@@ -59,47 +59,34 @@ if [ ! -z "$LDAP_HOST" ] && [ ! -z "$LDAP_BASE_DN" ] && [ ! -z "$LDAP_USER_BASE"
     envsubst < "${INT_CONF_DIR}/ldap-geostore-spring-security.xml" > "${MS2_DIR}/WEB-INF/classes/geostore-spring-security.xml"
 fi
 
-if [ -d "$STATIC_DIR" ] ; then
-    mkdir -p "${MS2_DIR}/static"
-    cp "${STATIC_DIR}"/* "${MS2_DIR}/static"
-fi
+[ -d "$STATIC_DIR" ] && mkdir -p "${MS2_DIR}/static" && cp "${STATIC_DIR}"/* "${MS2_DIR}/static"
 
-if [ -f "$LOCAL_CONFIG" ] ; then
-    cp "$LOCAL_CONFIG" "${MS2_DIR}/localConfig.json"
-fi
+[ -f "$LOCAL_CONFIG" ] && cp "$LOCAL_CONFIG" "${MS2_DIR}/localConfig.json"
 
-if [ -f "$NEW_JSON" ] ; then
-    cp "$NEW_JSON" "${MS2_DIR}/new.json"
-fi
+[ -f "$NEW_JSON" ] && cp "$NEW_JSON" "${MS2_DIR}/new.json"
 
-if [ -f "$PLUGINS_CONFIG" ] ; then
-    cp "$PLUGINS_CONFIG" "${MS2_DIR}/pluginsConfig.json"
-fi
+[ -f "$PLUGINS_CONFIG" ] && cp "$PLUGINS_CONFIG" "${MS2_DIR}/pluginsConfig.json"
 
 # todo: make the following more generic for more language support
 if [ ! -z "$HOME_SUBTITLE_EN" ] || [ -f "$HOME_SUBTITLE_EN_FILE" ] ; then
-    if [ -f "$HOME_SUBTITLE_EN_FILE" ] ; then
-        HOME_SUBTITLE_EN=$(cat "$HOME_SUBTITLE_EN_FILE")
-    fi
+
+    [ -f "$HOME_SUBTITLE_EN_FILE" ] && HOME_SUBTITLE_EN=$(cat "$HOME_SUBTITLE_EN_FILE")
+
     cat "${MS2_DIR}/translations/data.en-US.json" | jq --arg st "$HOME_SUBTITLE_EN" '.messages.home.shortDescription = $st' > ~/data.en-US.json && \
     mv ~/data.en-US.json "${MS2_DIR}/translations/data.en-US.json"
 fi
 
 if [ ! -z "$HOME_FOOTER_EN" ] || [ -f "$HOME_FOOTER_EN_FILE" ] ; then
-    if [ -f "$HOME_FOOTER_EN_FILE" ] ; then
-        HOME_FOOTER_EN=$(cat "$HOME_FOOTER_EN_FILE")
-    fi
+
+    [ -f "$HOME_FOOTER_EN_FILE" ] &&  HOME_FOOTER_EN=$(cat "$HOME_FOOTER_EN_FILE")
+
     cat "${MS2_DIR}/translations/data.en-US.json" | jq --arg ft "$HOME_FOOTER_EN" '.messages.home.footerDescription = $ft' > ~/data.en-US.json && \
     mv ~/data.en-US.json "${MS2_DIR}/translations/data.en-US.json"
 fi
 
-if [ -z "$GS_PG_PORT" ] ; then
-    GS_PG_PORT=5432
-fi
+[ -z "$GS_PG_PORT" ] && GS_PG_PORT=5432
 
-if [ -z "$GS_PG_DB" ] ; then
-    GS_PG_DB=geostore
-fi
+[ -z "$GS_PG_DB" ] && GS_PG_DB=geostore
 
 if [ ! -z "$GS_PG_USER_FILE" ] && [ -f "$GS_PG_USER_FILE" ] ; then
     GS_PG_USER="$(cat ${GS_PG_USER_FILE})"
