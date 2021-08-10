@@ -119,11 +119,14 @@ if [ ! -z "$GS_PG_HOST" ] && [ ! -z "$GS_PG_USER" ] && [ ! -z "$GS_PG_PASS" ] ; 
     export PGUSER="$GS_PG_USER"
     export PGPASSWORD="$GS_PG_PASS"
 
+    [ -z "$GS_PG_SCHEMA" ] && GS_PG_SCHEMA=geostore
+
     PG_PROP="${WEBINF_CLASSES}/geostore-datasource-ovr.properties"
     cp "$GS_PG_PROP" "$PG_PROP"
     sed -i -e "s/geostoreDataSource.url=/geostoreDataSource.url=jdbc:postgresql:\/\/${GS_PG_HOST}:${GS_PG_PORT}\/${GS_PG_DB}/g" \
         -e "s/geostoreDataSource.username=/geostoreDataSource.username=${GS_PG_USER}/g" \
         -e "s/geostoreDataSource.password=/geostoreDataSource.password=${GS_PG_PASS}/g" \
+        -e "s/jpaPropertyMap[hibernate.default_schema]=/jpaPropertyMap[hibernate.default_schema]=${GS_PG_SCHEMA}/g" \
         "$PG_PROP"
     set -x
     until pg_isready; do
@@ -132,17 +135,13 @@ if [ ! -z "$GS_PG_HOST" ] && [ ! -z "$GS_PG_USER" ] && [ ! -z "$GS_PG_PASS" ] ; 
     done
 
     # We can connect to the db. Let's check if the 'geostore' schema exists
-    SCHEMA_RES=`psql -t -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'geostore';"`
-    if ! printf "%s" "$SCHEMA_RES" | grep -q geostore ; then
+    SCHEMA_RES=`psql -t -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '${GS_PG_SCHEMA}';"`
+    if ! printf "%s" "$SCHEMA_RES" | grep -q "$GS_PG_SCHEMA" ; then
         echo "geostore schema does not exist. creating..."
-        psql -c "CREATE SCHEMA geostore;"
-        psql -c "GRANT USAGE ON SCHEMA geostore TO ${GS_PG_USER};"
-        psql -c "GRANT ALL ON SCHEMA geostore TO ${GS_PG_USER};"
-        psql -c "ALTER USER ${GS_PG_USER} SET search_path TO geostore , public;"
-
-        echo "Creating database tables using Geostore SQL script"
-        export PGOPTIONS="--search_path=geostore"
-        psql -f "${INT_CONF_DIR}/sql/002_create_schema_postgres.sql"
+        psql -c "CREATE SCHEMA ${GS_PG_SCHEMA};"
+        psql -c "GRANT USAGE ON SCHEMA ${GS_PG_SCHEMA} TO ${GS_PG_USER};"
+        psql -c "GRANT ALL ON SCHEMA ${GS_PG_SCHEMA} TO ${GS_PG_USER};"
+        psql -c "ALTER USER ${GS_PG_USER} SET search_path TO ${GS_PG_SCHEMA} , public;"
 
         set_admin_user "$PG_PROP"
     fi
