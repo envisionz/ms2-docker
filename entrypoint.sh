@@ -2,6 +2,17 @@
 
 set -e
 
+# If an environment variable has a _FILE variant, get the contents of that file, otherwise output the non _FILE variant
+# usage: get_file_env ENV_FILE ENV
+get_file_env()
+{
+    if [ ! -z "$1" ] && [ -f "$1" ] ; then
+        cat "$1"
+    else
+        printf "%s" "$2"
+    fi
+}
+
 CONF_DIR=/config
 INT_CONF_DIR=/internal-config
 STATIC_DIR=/static
@@ -41,9 +52,9 @@ if [ ! -z "$LDAP_HOST" ] && [ ! -z "$LDAP_BASE_DN" ] && [ ! -z "$LDAP_USER_BASE"
     [ -z "$LDAP_ATTR_EMAIL" ] && export LDAP_ATTR_EMAIL="mail"
 
     [ ! -z "$LDAP_NESTED_GROUP_FILTER" ] && xml_edit_attr "//property[@name=enableHierarchicalGroups]/@value" "true"
-    if [ ! -z "$LDAP_BIND_PASS_FILE" ] && [ -f "$LDAP_BIND_PASS_FILE" ] ; then
-        export LDAP_BIND_PASS="$(cat ${LDAP_BIND_PASS_FILE})"
-    fi
+
+    export LDAP_BIND_PASS="$(get_file_env ${LDAP_BIND_PASS_FILE} ${LDAP_BIND_PASS})"
+
     if [ -z "$LDAP_BIND_DN" ] || [ -z "$LDAP_BIND_PASS" ] ; then
         xml_del "//bean[@id=contextSource]/property[@name=userDn]"
         xml_del "//bean[@id=contextSource]/property[@name=password]"
@@ -67,19 +78,16 @@ fi
 
 [ -f "$PLUGINS_CONFIG" ] && cp "$PLUGINS_CONFIG" "${MS2_DIR}/pluginsConfig.json"
 
+
+HOME_SUBTITLE_EN=$(get_file_env "${HOME_SUBTITLE_EN_FILE}" "${HOME_SUBTITLE_EN}")
 # todo: make the following more generic for more language support
-if [ ! -z "$HOME_SUBTITLE_EN" ] || [ -f "$HOME_SUBTITLE_EN_FILE" ] ; then
-
-    [ -f "$HOME_SUBTITLE_EN_FILE" ] && HOME_SUBTITLE_EN=$(cat "$HOME_SUBTITLE_EN_FILE")
-
+if [ ! -z "$HOME_SUBTITLE_EN" ] ; then
     cat "${MS2_DIR}/translations/data.en-US.json" | jq --arg st "$HOME_SUBTITLE_EN" '.messages.home.shortDescription = $st' > ~/data.en-US.json && \
     mv ~/data.en-US.json "${MS2_DIR}/translations/data.en-US.json"
 fi
 
-if [ ! -z "$HOME_FOOTER_EN" ] || [ -f "$HOME_FOOTER_EN_FILE" ] ; then
-
-    [ -f "$HOME_FOOTER_EN_FILE" ] &&  HOME_FOOTER_EN=$(cat "$HOME_FOOTER_EN_FILE")
-
+HOME_FOOTER_EN=$(get_file_env "${HOME_FOOTER_EN_FILE}" "${HOME_FOOTER_EN}")
+if [ ! -z "$HOME_FOOTER_EN" ] ; then
     cat "${MS2_DIR}/translations/data.en-US.json" | jq --arg ft "$HOME_FOOTER_EN" '.messages.home.footerDescription = $ft' > ~/data.en-US.json && \
     mv ~/data.en-US.json "${MS2_DIR}/translations/data.en-US.json"
 fi
@@ -88,20 +96,15 @@ fi
 
 [ -z "$GS_PG_DB" ] && GS_PG_DB=geostore
 
-if [ ! -z "$GS_PG_USER_FILE" ] && [ -f "$GS_PG_USER_FILE" ] ; then
-    GS_PG_USER="$(cat ${GS_PG_USER_FILE})"
-fi
+GS_PG_USER=$(get_file_env "${GS_PG_USER_FILE}" "${GS_PG_USER}")
 
-if [ ! -z "$GS_PG_PASS_FILE" ] && [ -f "$GS_PG_PASS_FILE" ] ; then
-    GS_PG_PASS="$(cat ${GS_PG_PASS_FILE})"
-fi
+GS_PG_PASS=$(get_file_env "${GS_PG_PASS_FILE}" "${GS_PG_PASS}")
 
 set_admin_user()
 {
     echo "creating admin user..."
-    if [ ! -z "$MAPSTORE_ADMIN_PASS_FILE" ] && [ -f "$MAPSTORE_ADMIN_PASS_FILE" ] ; then
-        MAPSTORE_ADMIN_PASS="$(cat ${MAPSTORE_ADMIN_PASS_FILE})"
-    fi
+    MAPSTORE_ADMIN_PASS=$(get_file_env "${MAPSTORE_ADMIN_PASS_FILE}" "${MAPSTORE_ADMIN_PASS}")
+
     [ -z MAPSTORE_ADMIN_USER ] && MAPSTORE_ADMIN_USER="admin"
     [ -z MAPSTORE_ADMIN_PASS ] && MAPSTORE_ADMIN_PASS="admin"
     xmlstarlet ed -P -L -u "/InitUserList/User/name" -v "$MAPSTORE_ADMIN_USER" ${GS_USER_INIT}
