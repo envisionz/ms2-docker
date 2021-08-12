@@ -21,6 +21,8 @@ You may customise the container using the following environment variables.
 
 The `_FILE` variants listed above take a filepath. The files may be injected via mounts/configs/secrets.
 
+If `GS_PG_HOST`, `GS_PG_USER` and `GS_PG_PASS` are not set, the container falls back to using a Hibernate disk based database file. This file will not be retained unless you mount a volume at `/h2db`.
+
 ## Overriding Config Files
 
 If you mount the following files in the container, they will override the default Mapstore2 files:
