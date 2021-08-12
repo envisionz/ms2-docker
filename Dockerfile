@@ -13,8 +13,8 @@ RUN apt-get update && apt-get install -y postgresql-client jq xmlstarlet gettext
 RUN cd ${CATALINA_BASE}/webapps && \
     wget https://github.com/geosolutions-it/MapStore2/releases/download/${MS2_TAG}/mapstore.war && \
     wget https://github.com/geosolutions-it/MapStore2/releases/download/${MS2_TAG}/mapstore-printing.zip && \
-    rm -rf ./ROOT && mkdir ./ROOT && \
-    cd ./ROOT && jar -xvf ../mapstore.war && \
+    mkdir ./mapstore && \
+    cd ./mapstore && jar -xvf ../mapstore.war && \
     unzip ../mapstore-printing.zip && cd .. && \
     rm mapstore.war mapstore-printing.zip
 

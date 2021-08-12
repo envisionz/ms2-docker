@@ -16,7 +16,7 @@ get_file_env()
 CONF_DIR=/config
 INT_CONF_DIR=/internal-config
 STATIC_DIR=/static
-MS2_DIR="${CATALINA_BASE}/webapps/ROOT"
+MS2_DIR="${CATALINA_BASE}/webapps/mapstore"
 WEBINF_CLASSES="${MS2_DIR}/WEB-INF/classes"
 
 GS_PG_PROP="${INT_CONF_DIR}/geostore-datasource-ovr-postgres.properties"
