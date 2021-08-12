@@ -4,7 +4,7 @@ FROM tomcat:9-jdk11-openjdk-buster
 ENV CATALINA_BASE "$CATALINA_HOME"
 ENV JAVA_OPTS="${JAVA_OPTS}  -Xms512m -Xmx512m"
 
-ARG MS2_TAG=v2021.01.03
+ARG MS2_TAG=v2021.01.04
 ARG GEOSTORE_VERS=v1.6.0
 
 RUN apt-get update && apt-get install -y postgresql-client jq xmlstarlet gettext && apt-get clean
