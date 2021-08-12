@@ -119,16 +119,17 @@ if [ ! -z "$GS_PG_HOST" ] && [ ! -z "$GS_PG_USER" ] && [ ! -z "$GS_PG_PASS" ] ; 
     export PGUSER="$GS_PG_USER"
     export PGPASSWORD="$GS_PG_PASS"
 
+    set -x
     [ -z "$GS_PG_SCHEMA" ] && GS_PG_SCHEMA=geostore
 
     PG_PROP="${WEBINF_CLASSES}/geostore-datasource-ovr.properties"
     cp "$GS_PG_PROP" "$PG_PROP"
-    sed -i -e "s/geostoreDataSource.url=/geostoreDataSource.url=jdbc:postgresql:\/\/${GS_PG_HOST}:${GS_PG_PORT}\/${GS_PG_DB}/g" \
-        -e "s/geostoreDataSource.username=/geostoreDataSource.username=${GS_PG_USER}/g" \
-        -e "s/geostoreDataSource.password=/geostoreDataSource.password=${GS_PG_PASS}/g" \
-        -e "s/jpaPropertyMap[hibernate.default_schema]=/jpaPropertyMap[hibernate.default_schema]=${GS_PG_SCHEMA}/g" \
+    sed -i -e 's|\(geostoreDataSource.url=\)|\1jdbc:postgresql://'"${GS_PG_HOST}:${GS_PG_PORT}"'/'"${GS_PG_DB}"'|g' \
+        -e 's|\(geostoreDataSource.username=\)|\1'"${GS_PG_USER}"'|g' \
+        -e 's|\(geostoreDataSource.password=\)|\1'"${GS_PG_PASS}"'|g' \
+        -e 's|\(geostoreEntityManagerFactory\.jpaPropertyMap\[hibernate\.default_schema\]=\)|\1'"${GS_PG_SCHEMA}"'|g' \
         "$PG_PROP"
-    set -x
+    
     until pg_isready; do
         echo "Postgres is unavailable - sleeping"
         sleep 2
