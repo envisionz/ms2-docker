@@ -100,9 +100,9 @@
 
 	<!-- This bean points at the embedded directory server created by the ldap-server element above -->
 	<bean id="contextSource" class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
-		<constructor-arg value="${LDAP_PROTOCOL}://${LDAP_HOST}:${LDAP_PORT}/${LDAP_BASE_DN}" />
-		<property name="userDn" value="${LDAP_BIND_DN}"/>
-    	<property name="password" value="${LDAP_BIND_PW}"/>
+		<constructor-arg value="${MS2_LDAP_PROTOCOL}://${MS2_LDAP_HOST}:${MS2_LDAP_PORT}/${MS2_LDAP_BASE_DN}" />
+		<property name="userDn" value="${MS2_LDAP_BIND_DN}"/>
+    	<property name="password" value="${MS2_LDAP_BIND_PW}"/>
 	</bean>
 
     <!-- 
@@ -120,8 +120,8 @@
 				<property name="userSearch">
 					<bean id="userSearch"
 						class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
-						<constructor-arg index="0" value="${LDAP_USER_BASE}" />
-						<constructor-arg index="1" value="${LDAP_USER_FILTER}" />
+						<constructor-arg index="0" value="${MS2_LDAP_USER_BASE}" />
+						<constructor-arg index="1" value="${MS2_LDAP_USER_FILTER}" />
 						<constructor-arg index="2" ref="contextSource" />
 					</bean>
 				</property>
@@ -132,21 +132,21 @@
 				class="it.geosolutions.geostore.services.rest.security.GeoStoreLdapAuthoritiesPopulator">
 				<constructor-arg ref="contextSource" />
 				<!-- groupSearchBase -->
-				<constructor-arg value="${LDAP_GROUP_BASE}" />
+				<constructor-arg value="${MS2_LDAP_GROUP_BASE}" />
 				<!-- roleSearchBase -->
-				<constructor-arg value="${LDAP_ROLE_BASE}" />
-				<property name="groupSearchFilter" value="${LDAP_GROUP_FILTER}" />
-				<property name="roleSearchFilter" value="${LDAP_ROLE_FILTER}" />
+				<constructor-arg value="${MS2_LDAP_ROLE_BASE}" />
+				<property name="groupSearchFilter" value="${MS2_LDAP_GROUP_FILTER}" />
+				<property name="roleSearchFilter" value="${MS2_LDAP_ROLE_FILTER}" />
 				
 				<!-- nested groups support -->
 				<property name="enableHierarchicalGroups" value="false" />
-				<property name="groupInGroupSearchFilter" value="${LDAP_NESTED_GROUP_FILTER}" />
+				<property name="groupInGroupSearchFilter" value="${MS2_LDAP_NESTED_GROUP_FILTER}" />
 				<property name="maxLevelGroupsSearch" value="5" />
 				<!-- the GeoStore convetion is:
 				  * Groups starting with 'ROLE_' will be threated as Auth Roles
 				  * Groups starting withOUT 'ROLE_' will be threated as Groups
 				 -->
-				<property name="rolePrefix" value="${LDAP_ROLE_PREFIX}" />
+				<property name="rolePrefix" value="${MS2_LDAP_ROLE_PREFIX}" />
 				<property name="searchSubtree" value="true" />
 				<property name="convertToUpperCase" value="true" />
 			</bean>
@@ -156,8 +156,8 @@
 			<bean class="it.geosolutions.geostore.core.security.ldap.CustomAttributesLdapUserDetailsMapper">
 				<constructor-arg>
 					<map>
-						<entry key="FullName" value="${LDAP_ATTR_FULL_NAME}"/>
-						<entry key="Email" value="${LDAP_ATTR_EMAIL}"/>
+						<entry key="FullName" value="${MS2_LDAP_ATTR_FULL_NAME}"/>
+						<entry key="Email" value="${MS2_LDAP_ATTR_EMAIL}"/>
 					</map>
 				</constructor-arg>
 			</bean>

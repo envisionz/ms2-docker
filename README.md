@@ -8,20 +8,20 @@ You may customise the container using the following environment variables.
 
 | ENV | Description |
 | --- | --- |
-| `MAPSTORE_ADMIN_USER` | Username for administrator user. Defaults to `admin` |
-| `MAPSTORE_ADMIN_PASS`, `MAPSTORE_ADMIN_PASS_FILE` | Password for administrator user. Defaults to `admin` |
-| `GS_PG_HOST` | PostgreSQL hostname to connect to. |
-| `GS_PG_PORT` | PostgreSQL port. Default `5432` |
-| `GS_PG_DB` | PosrgreSQL database. Default `geostore` |
-| `GS_PG_SCHEMA` | PostgreSQL schema to use. Default `geostore` |
-| `GS_PG_USER`, `GS_PG_USER_FILE` | PostgreSQL username. |
-| `GS_PG_PASS`, `GS_PG_PASS_FILE` | PostgreSQL password. |
-| `HOME_SUBTITLE_EN`, `HOME_SUBTITLE_EN_FILE` | Customise subtitle on Home screen |
-| `HOME_FOOTER_EN`, `HOME_FOOTER_EN_FILE` | Customise footer on Home screen |
+| `MS2_ADMIN_USER` | Username for administrator user. Defaults to `admin` |
+| `MS2_ADMIN_PASS`, `MS2_ADMIN_PASS_FILE` | Password for administrator user. Defaults to `admin` |
+| `MS2_PG_HOST` | PostgreSQL hostname to connect to. |
+| `MS2_PG_PORT` | PostgreSQL port. Default `5432` |
+| `MS2_PG_DB` | PosrgreSQL database. Default `geostore` |
+| `MS2_PG_SCHEMA` | PostgreSQL schema to use. Default `geostore` |
+| `MS2_PG_USER`, `MS2_PG_USER_FILE` | PostgreSQL username. |
+| `MS2_PG_PASS`, `MS2_PG_PASS_FILE` | PostgreSQL password. |
+| `MS2_HOME_SUBTITLE_EN`, `MS2_HOME_SUBTITLE_EN_FILE` | Customise subtitle on Home screen |
+| `MS2_HOME_FOOTER_EN`, `MS2_HOME_FOOTER_EN_FILE` | Customise footer on Home screen |
 
 The `_FILE` variants listed above take a filepath. The files may be injected via mounts/configs/secrets.
 
-If `GS_PG_HOST`, `GS_PG_USER` and `GS_PG_PASS` are not set, the container falls back to using a Hibernate disk based database file. This file will not be retained unless you mount a volume at `/h2db`.
+If `MS2_PG_HOST`, `MS2_PG_USER` and `MS2_PG_PASS` are not set, the container falls back to using a Hibernate disk based database file. This file will not be retained unless you mount a volume at `/h2db`.
 
 ## Overriding Config Files
 
