@@ -30,7 +30,7 @@ ENV TERM xterm
 ARG MS2_USER=mapstore
 ARG MS2_GROUP=mapstore
 ARG MS2_UID=5005
-ARG MS2_GID= 50005
+ARG MS2_GID=50005
 
 RUN groupadd -r ${MS2_GROUP} -g ${MS2_GID} && \
     useradd -m -d /home/${MS2_USER}/ -u ${MS2_UID} --gid ${MS2_GID} -s /bin/bash -G ${MS2_GROUP} ${MS2_USER}
