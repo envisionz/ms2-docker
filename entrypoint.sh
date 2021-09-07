@@ -2,6 +2,8 @@
 
 set -e
 
+source "${MS2_SCRIPT_DIR}/tc_common.sh"
+
 # If an environment variable has a _FILE variant, get the contents of that file, otherwise output the non _FILE variant
 # usage: get_file_env ENV_FILE ENV
 get_file_env()
@@ -16,7 +18,8 @@ get_file_env()
 conf_dir=/config
 int_conf_dir=/internal-config
 static_dir=/static
-ms2_dir="${CATALINA_BASE}/webapps/mapstore"
+ms2_dir="${CATALINA_HOME}/webapps/mapstore"
+ms2_path="/mapstore"
 webinf_classes="${ms2_dir}/WEB-INF/classes"
 
 gs_pg_prop="${int_conf_dir}/geostore-datasource-ovr-postgres.properties"
@@ -26,6 +29,37 @@ gs_user_init="${int_conf_dir}/user_init_list.xml"
 local_config="${conf_dir}/localConfig.json"
 new_json="${conf_dir}/new.json"
 plugins_config="${conf_dir}/pluginsConfig.json"
+
+url_path="$MS2_URL_PATH"
+proxy_domain="$MS2_PROXY_DOMAIN"
+proxy_proto="$MS2_PROXY_PROTO"
+
+# Handle paths first, to account for container restarts
+if [ ! -z "$url_path" ]; then
+    url_path=$(strip_url_path "$url_path")
+fi
+
+if [ -z "$url_path" ]; then
+    ms2_dir=$(set_app_path "$ms2_path")
+    tc_print "Mapstore2 will be available at '/' path"
+else
+    ms2_dir=$(set_app_path "$ms2_path" "$url_path")
+    tc_print "Mapstore2 will be available at '/${url_path}' path"
+fi
+
+# Setup connector for reverse proxy
+if [ ! -z "$proxy_domain" ]; then
+    tc_print "Setting up Mapstore2 reverse proxy for ${proxy_domain}..."
+    if [ "$proxy_proto" != "http" ] && [ "$proxy_proto" != "https" ]; then
+        tc_print "Warning: MS2_PROXY_PROTO not set to http or https. Defaulting to http"
+        proxy_proto="http"
+    fi
+    
+    set_connector_proxy "$proxy_domain" "$proxy_proto"
+fi
+
+# Setup tomcat healthcheck
+set_healthcheck "$ms2_dir"
 
 if [ ! -z "$MS2_LDAP_HOST" ] && [ ! -z "$MS2_LDAP_BASE_DN" ] && [ ! -z "$MS2_LDAP_USER_BASE" ] && [ ! -z "$MS2_LDAP_GROUP_BASE" ] ; then
     echo "Configuring LDAP"
