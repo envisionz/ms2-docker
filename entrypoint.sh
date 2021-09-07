@@ -13,30 +13,30 @@ get_file_env()
     fi
 }
 
-CONF_DIR=/config
-INT_CONF_DIR=/internal-config
-STATIC_DIR=/static
-MS2_DIR="${CATALINA_BASE}/webapps/mapstore"
-WEBINF_CLASSES="${MS2_DIR}/WEB-INF/classes"
+conf_dir=/config
+int_conf_dir=/internal-config
+static_dir=/static
+ms2_dir="${CATALINA_BASE}/webapps/mapstore"
+webinf_classes="${ms2_dir}/WEB-INF/classes"
 
-GS_PG_PROP="${INT_CONF_DIR}/geostore-datasource-ovr-postgres.properties"
-GS_H2_PROP="${INT_CONF_DIR}/h2_disk.properties"
-GS_USER_INIT="${INT_CONF_DIR}/user_init_list.xml"
+gs_pg_prop="${int_conf_dir}/geostore-datasource-ovr-postgres.properties"
+gs_h2_prop="${int_conf_dir}/h2_disk.properties"
+gs_user_init="${int_conf_dir}/user_init_list.xml"
 
-LOCAL_CONFIG="${CONF_DIR}/localConfig.json"
-NEW_JSON="${CONF_DIR}/new.json"
-PLUGINS_CONFIG="${CONF_DIR}/pluginsConfig.json"
+local_config="${conf_dir}/localConfig.json"
+new_json="${conf_dir}/new.json"
+plugins_config="${conf_dir}/pluginsConfig.json"
 
 if [ ! -z "$LDAP_HOST" ] && [ ! -z "$LDAP_BASE_DN" ] && [ ! -z "$LDAP_USER_BASE" ] && [ ! -z "$LDAP_GROUP_BASE" ] ; then
     echo "Configuring LDAP"
-    # "${MS2_DIR}/WEB-INF/classes/geostore-spring-security.xml"
+    # "${ms2_dir}/WEB-INF/classes/geostore-spring-security.xml"
     xml_del() 
     {
-        xmlstarlet ed -P -L -d "$1" "${INT_CONF_DIR}/ldap-geostore-spring-security.xml"
+        xmlstarlet ed -P -L -d "$1" "${int_conf_dir}/ldap-geostore-spring-security.xml"
     }
     xml_edit_attr()
     {
-        xmlstarlet ed -P -L -u "$1" -v "$2" "${INT_CONF_DIR}/ldap-geostore-spring-security.xml"
+        xmlstarlet ed -P -L -u "$1" -v "$2" "${int_conf_dir}/ldap-geostore-spring-security.xml"
     }
 
     [ -z "$LDAP_PROTOCOL" ] && export LDAP_PROTOCOL="ldap"
@@ -67,29 +67,29 @@ if [ ! -z "$LDAP_HOST" ] && [ ! -z "$LDAP_BASE_DN" ] && [ ! -z "$LDAP_USER_BASE"
     export LDAP_ROLE_FILTER=$(printenv LDAP_ROLE_FILTER | xmlstarlet esc)
 
     # envsubst '${LDAP_HOST} ${LDAP_BASE_DN} ${LDAP_USER_BASE} ${LDAP_GROUP_BASE} ${LDAP_PORT} ${LDAP_USER_FILTER} ${LDAP_GROUP_FILTER} ${LDAP_ROLE_BASE} ${LDAP_ROLE_FILTER} ${LDAP_NESTED_GROUP_FILTER} ${LDAP_BIND_DN} ${LDAP_BIND_PW}' \
-    envsubst < "${INT_CONF_DIR}/ldap-geostore-spring-security.xml" > "${MS2_DIR}/WEB-INF/classes/geostore-spring-security.xml"
+    envsubst < "${int_conf_dir}/ldap-geostore-spring-security.xml" > "${ms2_dir}/WEB-INF/classes/geostore-spring-security.xml"
 fi
 
-[ -d "$STATIC_DIR" ] && mkdir -p "${MS2_DIR}/static" && cp "${STATIC_DIR}"/* "${MS2_DIR}/static"
+[ -d "$static_dir" ] && mkdir -p "${ms2_dir}/static" && cp "${static_dir}"/* "${ms2_dir}/static"
 
-[ -f "$LOCAL_CONFIG" ] && cp "$LOCAL_CONFIG" "${MS2_DIR}/localConfig.json"
+[ -f "$local_config" ] && cp "$local_config" "${ms2_dir}/localConfig.json"
 
-[ -f "$NEW_JSON" ] && cp "$NEW_JSON" "${MS2_DIR}/new.json"
+[ -f "$new_json" ] && cp "$new_json" "${ms2_dir}/new.json"
 
-[ -f "$PLUGINS_CONFIG" ] && cp "$PLUGINS_CONFIG" "${MS2_DIR}/pluginsConfig.json"
+[ -f "$plugins_config" ] && cp "$plugins_config" "${ms2_dir}/pluginsConfig.json"
 
 
 HOME_SUBTITLE_EN=$(get_file_env "${HOME_SUBTITLE_EN_FILE}" "${HOME_SUBTITLE_EN}")
 # todo: make the following more generic for more language support
 if [ ! -z "$HOME_SUBTITLE_EN" ] ; then
-    cat "${MS2_DIR}/translations/data.en-US.json" | jq --arg st "$HOME_SUBTITLE_EN" '.messages.home.shortDescription = $st' > ~/data.en-US.json && \
-    mv ~/data.en-US.json "${MS2_DIR}/translations/data.en-US.json"
+    cat "${ms2_dir}/translations/data.en-US.json" | jq --arg st "$HOME_SUBTITLE_EN" '.messages.home.shortDescription = $st' > ~/data.en-US.json && \
+    mv ~/data.en-US.json "${ms2_dir}/translations/data.en-US.json"
 fi
 
 HOME_FOOTER_EN=$(get_file_env "${HOME_FOOTER_EN_FILE}" "${HOME_FOOTER_EN}")
 if [ ! -z "$HOME_FOOTER_EN" ] ; then
-    cat "${MS2_DIR}/translations/data.en-US.json" | jq --arg ft "$HOME_FOOTER_EN" '.messages.home.footerDescription = $ft' > ~/data.en-US.json && \
-    mv ~/data.en-US.json "${MS2_DIR}/translations/data.en-US.json"
+    cat "${ms2_dir}/translations/data.en-US.json" | jq --arg ft "$HOME_FOOTER_EN" '.messages.home.footerDescription = $ft' > ~/data.en-US.json && \
+    mv ~/data.en-US.json "${ms2_dir}/translations/data.en-US.json"
 fi
 
 [ -z "$GS_PG_PORT" ] && GS_PG_PORT=5432
@@ -107,9 +107,9 @@ set_admin_user()
 
     [ -z MAPSTORE_ADMIN_USER ] && MAPSTORE_ADMIN_USER="admin"
     [ -z MAPSTORE_ADMIN_PASS ] && MAPSTORE_ADMIN_PASS="admin"
-    xmlstarlet ed -P -L -u "/InitUserList/User/name" -v "$MAPSTORE_ADMIN_USER" ${GS_USER_INIT}
-    xmlstarlet ed -P -L -u "/InitUserList/User/newPassword" -v "$MAPSTORE_ADMIN_PASS" ${GS_USER_INIT}
-    echo "geostoreInitializer.userListInitFile=file://${GS_USER_INIT}" >> "$1"
+    xmlstarlet ed -P -L -u "/InitUserList/User/name" -v "$MAPSTORE_ADMIN_USER" ${gs_user_init}
+    xmlstarlet ed -P -L -u "/InitUserList/User/newPassword" -v "$MAPSTORE_ADMIN_PASS" ${gs_user_init}
+    echo "geostoreInitializer.userListInitFile=file://${gs_user_init}" >> "$1"
 }
 
 if [ ! -z "$GS_PG_HOST" ] && [ ! -z "$GS_PG_USER" ] && [ ! -z "$GS_PG_PASS" ] ; then
@@ -122,8 +122,8 @@ if [ ! -z "$GS_PG_HOST" ] && [ ! -z "$GS_PG_USER" ] && [ ! -z "$GS_PG_PASS" ] ; 
     set -x
     [ -z "$GS_PG_SCHEMA" ] && GS_PG_SCHEMA=geostore
 
-    PG_PROP="${WEBINF_CLASSES}/geostore-datasource-ovr.properties"
-    cp "$GS_PG_PROP" "$PG_PROP"
+    PG_PROP="${webinf_classes}/geostore-datasource-ovr.properties"
+    cp "$gs_pg_prop" "$PG_PROP"
     sed -i -e 's|\(geostoreDataSource.url=\)|\1jdbc:postgresql://'"${GS_PG_HOST}:${GS_PG_PORT}"'/'"${GS_PG_DB}"'|g' \
         -e 's|\(geostoreDataSource.username=\)|\1'"${GS_PG_USER}"'|g' \
         -e 's|\(geostoreDataSource.password=\)|\1'"${GS_PG_PASS}"'|g' \
@@ -157,8 +157,8 @@ else
     echo "Postgres database and/or credentials not supplied"
     echo "Using H2 store at /h2db/db"
 
-    H2_PROP="${WEBINF_CLASSES}/geostore-datasource-ovr.properties"
-    cp "$GS_H2_PROP" "$H2_PROP"
+    H2_PROP="${webinf_classes}/geostore-datasource-ovr.properties"
+    cp "$gs_h2_prop" "$H2_PROP"
     sed -i -e 's,dbc:h2:\./test,dbc:h2:/h2db/db,g' "$H2_PROP"
     set_admin_user "$H2_PROP"
 fi
