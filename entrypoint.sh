@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -30,7 +30,7 @@ local_config="${conf_dir}/localConfig.json"
 new_json="${conf_dir}/new.json"
 plugins_config="${conf_dir}/pluginsConfig.json"
 
-url_path="$MS2_URL_PATH"
+url_path="${MS2_URL_PATH:-$ms2_path}"
 proxy_domain="$MS2_PROXY_DOMAIN"
 proxy_proto="$MS2_PROXY_PROTO"
 
