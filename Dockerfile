@@ -1,31 +1,12 @@
-FROM tomcat:9-jdk11-openjdk-buster
+FROM tomcat:9-jre11-openjdk-slim-bullseye
 
 # Tomcat specific options
-ENV CATALINA_BASE "$CATALINA_HOME"
 ENV JAVA_OPTS="${JAVA_OPTS}  -Xms512m -Xmx512m"
 
 ARG MS2_TAG=v2021.01.04
 ARG GEOSTORE_VERS=v1.6.0
 
-RUN apt-get update && apt-get install -y postgresql-client jq xmlstarlet gettext curl && apt-get clean
-
-# Download and extract Mapstore2 WAR files
-RUN cd ${CATALINA_BASE}/webapps && \
-    wget https://github.com/geosolutions-it/MapStore2/releases/download/${MS2_TAG}/mapstore.war && \
-    wget https://github.com/geosolutions-it/MapStore2/releases/download/${MS2_TAG}/mapstore-printing.zip && \
-    mkdir ./mapstore && \
-    cd ./mapstore && jar -xvf ../mapstore.war && \
-    unzip ../mapstore-printing.zip && cd .. && \
-    rm mapstore.war mapstore-printing.zip
-
-# Dowonload Geostore and extract sql scripts
-RUN git clone https://github.com/geosolutions-it/geostore.git -b ${GEOSTORE_VERS} && \
-    mkdir -p /internal-config/sql && cp -R geostore/doc/sql/. /internal-config/sql && rm -rf geostore
-
-# Copy files required for customization
-COPY ./config/ /internal-config/
-# Set variable to better handle terminal commands
-ENV TERM xterm
+RUN apt-get update && apt-get install -y postgresql-client jq xmlstarlet gettext curl unzip git && apt-get clean
 
 ARG MS2_USER=mapstore
 ARG MS2_GROUP=mapstore
@@ -36,6 +17,25 @@ RUN groupadd -r ${MS2_GROUP} -g ${MS2_GID} && \
     useradd -m -d /home/${MS2_USER}/ -u ${MS2_UID} --gid ${MS2_GID} -s /bin/bash -G ${MS2_GROUP} ${MS2_USER}
 
 RUN chown -R "${MS2_USER}:${MS2_GROUP}" ${CATALINA_HOME}
+
+# Download and extract Mapstore2 WAR files
+RUN cd ${CATALINA_HOME}/webapps && \
+    curl -L -o mapstore.war https://github.com/geosolutions-it/MapStore2/releases/download/${MS2_TAG}/mapstore.war && \
+    curl -L -o mapstore-printing.zip https://github.com/geosolutions-it/MapStore2/releases/download/${MS2_TAG}/mapstore-printing.zip && \
+    mkdir ./mapstore && \
+    cd ./mapstore && unzip ../mapstore.war && \
+    unzip ../mapstore-printing.zip && cd .. && \
+    rm mapstore.war mapstore-printing.zip && \
+    chown -R "${MS2_USER}:${MS2_GROUP}" ./mapstore
+
+# Dowonload Geostore and extract sql scripts
+RUN git clone https://github.com/geosolutions-it/geostore.git -b ${GEOSTORE_VERS} && \
+    mkdir -p /internal-config/sql && cp -R geostore/doc/sql/. /internal-config/sql && rm -rf geostore
+
+# Copy files required for customization
+COPY ./config/ /internal-config/
+# Set variable to better handle terminal commands
+ENV TERM xterm
 
 RUN mkdir -p /h2db \
     && chown "${MS2_USER}:${MS2_GROUP}" /h2db /internal-config/user_init_list.xml
