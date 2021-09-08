@@ -6,7 +6,10 @@ ENV JAVA_OPTS="${JAVA_OPTS}  -Xms512m -Xmx512m"
 ARG MS2_TAG=v2021.01.04
 ARG GEOSTORE_VERS=v1.6.0
 
-RUN apt-get update && apt-get install -y postgresql-client jq xmlstarlet gettext curl unzip git && apt-get clean
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    postgresql-client jq xmlstarlet gettext curl unzip git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG MS2_USER=mapstore
 ARG MS2_GROUP=mapstore
