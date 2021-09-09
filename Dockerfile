@@ -1,8 +1,5 @@
 FROM tomcat:9-jre11-openjdk-slim-buster
 
-# Tomcat specific options
-ENV JAVA_OPTS="${JAVA_OPTS}  -Xms512m -Xmx512m"
-
 ARG MS2_TAG=v2021.01.04
 ARG GEOSTORE_VERS=v1.6.0
 

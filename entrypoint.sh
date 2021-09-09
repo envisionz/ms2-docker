@@ -197,5 +197,11 @@ else
     set_admin_user "$h2_prop"
 fi
 
+java_mem_start=${MS2_JAVA_MEM_START:-"128m"} 
+java_mem_max=${MS2_JAVA_MEM_MAX:-"256m"} 
+
+mapstore_java_opts="-Xms${java_mem_start} -Xmx${java_mem_max}"
+export JAVA_OPTS="${JAVA_OPTS} ${mapstore_java_opts}"
+
 # Run original tomcat CMD
 exec catalina.sh run
