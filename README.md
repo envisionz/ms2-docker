@@ -38,6 +38,12 @@ If you mount the following files in the container, they will override the defaul
 | `/config/new.json` | The base configuration for creating new maps. |
 | `/config/pluginsConfig.json` | Plugin specific configuration file. |
 
+## Adding and Replacing Mapstore Image Assets
+
+You can add or replaces MapStore images stored in the `/dist/web/client/product/assets/img/` directory. Any file mounted in the `/ms2-img-assets` will be copied into the Mapstore image assets directory.
+
+For example, mount an image to `/ms2-img-assets/mapstore-header.jpg` to replace the default jumbotron image.
+
 ## Adding Fdditional Files
 
 Additional files can be added to the container, for example logos and map thumbnails. Any files mounted in the `/static` mountpoint will be available.

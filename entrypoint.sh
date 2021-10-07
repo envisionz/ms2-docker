@@ -18,6 +18,8 @@ get_file_env()
 conf_dir=/config
 int_conf_dir=/internal-config
 static_dir=/static
+img_asset_dir=/ms2-img-assets
+
 ms2_dir="${CATALINA_HOME}/webapps/mapstore"
 ms2_path="/mapstore"
 webinf_classes="${ms2_dir}/WEB-INF/classes"
@@ -112,6 +114,9 @@ fi
 
 [ -f "$plugins_config" ] && cp "$plugins_config" "${ms2_dir}/pluginsConfig.json"
 
+if [ -d "$img_asset_dir" ]; then
+    cp -f ${img_asset_dir}/* "${ms2_dir}/dist/web/client/product/assets/img/"
+fi
 
 MS2_HOME_SUBTITLE_EN=$(get_file_env "${MS2_HOME_SUBTITLE_EN_FILE}" "${MS2_HOME_SUBTITLE_EN}")
 # todo: make the following more generic for more language support
