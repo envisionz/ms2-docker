@@ -43,9 +43,11 @@ fi
 
 if [ -z "$url_path" ]; then
     ms2_dir=$(set_app_path "$ms2_path")
+    webinf_classes="${ms2_dir}/WEB-INF/classes"
     tc_print "Mapstore2 will be available at '/' path"
 else
     ms2_dir=$(set_app_path "$ms2_path" "$url_path")
+    webinf_classes="${ms2_dir}/WEB-INF/classes"
     tc_print "Mapstore2 will be available at '/${url_path}' path"
 fi
 
