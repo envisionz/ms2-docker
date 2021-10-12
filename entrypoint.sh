@@ -162,7 +162,6 @@ if [ ! -z "$MS2_PG_HOST" ] && [ ! -z "$MS2_PG_USER" ] && [ ! -z "$MS2_PG_PASS" ]
     export PGUSER="$MS2_PG_USER"
     export PGPASSWORD="$MS2_PG_PASS"
 
-    set -x
     [ -z "$MS2_PG_SCHEMA" ] && MS2_PG_SCHEMA=geostore
 
     pg_prop="${webinf_classes}/geostore-datasource-ovr.properties"
