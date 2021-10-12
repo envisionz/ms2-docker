@@ -47,7 +47,7 @@ ENV MS2_SCRIPT_DIR=/scripts
 RUN mkdir -p ${MS2_SCRIPT_DIR}
 
 # Get common tomcat function for paths and proxy
-RUN curl -o ${MS2_SCRIPT_DIR}/tc_common.sh https://raw.githubusercontent.com/envisionz/docker-common/75f9a6f791532f7414ac6b279b759c6169973674/tomcat/tomcat-common.sh \
+RUN curl -o ${MS2_SCRIPT_DIR}/tc_common.sh https://raw.githubusercontent.com/envisionz/docker-common/3442a7b5860647524d52a662d704d8cc5d814d99/tomcat/tomcat-common.sh \
     && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_SCRIPT_DIR}/tc_common.sh \
     && chmod +x ${MS2_SCRIPT_DIR}/tc_common.sh
 
