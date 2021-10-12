@@ -20,7 +20,7 @@ int_conf_dir=/internal-config
 static_dir=/static
 img_asset_dir=/ms2-img-assets
 
-ms2_dir="${CATALINA_HOME}/webapps/mapstore"
+ms2_dir="$MS2_DIR"
 ms2_path="/mapstore"
 webinf_classes="${ms2_dir}/WEB-INF/classes"
 
@@ -41,15 +41,17 @@ if [ ! -z "$url_path" ]; then
     url_path=$(strip_url_path "$url_path")
 fi
 
-if [ -z "$url_path" ]; then
-    ms2_dir=$(set_app_path "$ms2_path")
-    webinf_classes="${ms2_dir}/WEB-INF/classes"
-    tc_print "Mapstore2 will be available at '/' path"
-else
-    ms2_dir=$(set_app_path "$ms2_path" "$url_path")
-    webinf_classes="${ms2_dir}/WEB-INF/classes"
-    tc_print "Mapstore2 will be available at '/${url_path}' path"
-fi
+set_app_ctx_with_hc "$ms2_dir" "$url_path"
+
+# if [ -z "$url_path" ]; then
+#     ms2_dir=$(set_app_path "$ms2_path")
+#     webinf_classes="${ms2_dir}/WEB-INF/classes"
+#     tc_print "Mapstore2 will be available at '/' path"
+# else
+#     ms2_dir=$(set_app_path "$ms2_path" "$url_path")
+#     webinf_classes="${ms2_dir}/WEB-INF/classes"
+#     tc_print "Mapstore2 will be available at '/${url_path}' path"
+# fi
 
 # Setup connector for reverse proxy
 if [ ! -z "$proxy_domain" ]; then
@@ -62,8 +64,8 @@ if [ ! -z "$proxy_domain" ]; then
     set_connector_proxy "$proxy_domain" "$proxy_proto"
 fi
 
-# Setup tomcat healthcheck
-set_healthcheck "$ms2_dir"
+# # Setup tomcat healthcheck
+# set_healthcheck "$ms2_dir"
 
 if [ ! -z "$MS2_LDAP_HOST" ] && [ ! -z "$MS2_LDAP_BASE_DN" ] && [ ! -z "$MS2_LDAP_USER_BASE" ] && [ ! -z "$MS2_LDAP_GROUP_BASE" ] ; then
     echo "Configuring LDAP"
