@@ -190,6 +190,9 @@ if [ ! -z "$MS2_PG_HOST" ] && [ ! -z "$MS2_PG_USER" ] && [ ! -z "$MS2_PG_PASS" ]
         psql -c "ALTER USER ${MS2_PG_USER} SET search_path TO ${MS2_PG_SCHEMA} , public;"
 
         set_admin_user "$pg_prop"
+        sed -i \
+            -e 's|\(geostoreEntityManagerFactory\.jpaPropertyMap\[hibernate\.hbm2ddl\.auto\]=\)validate|\1update|g' \
+            "$pg_prop"
     fi
 
     # cleanup
