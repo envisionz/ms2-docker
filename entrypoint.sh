@@ -27,6 +27,7 @@ webinf_classes="${ms2_dir}/WEB-INF/classes"
 gs_pg_prop="${int_conf_dir}/geostore-datasource-ovr-postgres.properties"
 gs_h2_prop="${int_conf_dir}/h2_disk.properties"
 gs_user_init="${int_conf_dir}/user_init_list.xml"
+log_prop="${int_conf_dir}/log4j.properties"
 
 local_config="${conf_dir}/localConfig.json"
 new_json="${conf_dir}/new.json"
@@ -64,8 +65,10 @@ if [ ! -z "$proxy_domain" ]; then
     set_connector_proxy "$proxy_domain" "$proxy_proto"
 fi
 
-# # Setup tomcat healthcheck
-# set_healthcheck "$ms2_dir"
+# Setup log4j logging
+log_level=${MS2_LOG_LEVEL:-WARN}
+cp -f "${log_prop}" "${webinf_classes}/log4j.properties"
+sed -i -e "s/INFO/${log_level}/g" "${webinf_classes}/log4j.properties"
 
 if [ ! -z "$MS2_LDAP_HOST" ] && [ ! -z "$MS2_LDAP_BASE_DN" ] && [ ! -z "$MS2_LDAP_USER_BASE" ] && [ ! -z "$MS2_LDAP_GROUP_BASE" ] ; then
     echo "Configuring LDAP"

@@ -23,6 +23,7 @@ You may customise the container using the following environment variables.
 | `MS2_PROXY_PROTO` | Is the proxy a TLS terminating proxy? Valid values are `http` or `https` |
 | `MS2_JAVA_MEM_START` | Allow setting Java `-Xms` option. Default: `128m` |
 | `MS2_JAVA_MEM_MAX` | Allow setting Java `-Xmx` option. Default: `256m` |
+| `MS2_LOG_LEVEL` | Log verbosity. Default: `WARN` Allowed: `ALL`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`, `OFF` |
 
 The `_FILE` variants listed above take a filepath. The files may be injected via mounts/configs/secrets.
 

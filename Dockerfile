@@ -40,9 +40,6 @@ ENV TERM xterm
 RUN mkdir -p /h2db \
     && chown "${MS2_USER}:${MS2_GROUP}" /h2db /internal-config/user_init_list.xml
 
-RUN cp -f /internal-config/log4j.properties ${MS2_DIR}/WEB-INF/classes/log4j.properties \
-    && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DIR}/WEB-INF/classes/log4j.properties
-
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
