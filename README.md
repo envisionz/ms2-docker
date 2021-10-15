@@ -45,6 +45,10 @@ You can add or replaces MapStore images stored in the `/dist/web/client/product/
 
 For example, mount an image to `/ms2-img-assets/mapstore-header.jpg` to replace the default jumbotron image.
 
+## Adding and Replacing Mapstore Print Files
+
+You can add or replace the files used for printing, by mounting them to the `/ms2-print-dir` directory. You can replace the banner image (`print_header.png`), north arrow (`Arrow_North_CFCF.svg`), or a modified config file (`config.yaml`).
+
 ## Adding Fdditional Files
 
 Additional files can be added to the container, for example logos and map thumbnails. Any files mounted in the `/static` mountpoint will be available.

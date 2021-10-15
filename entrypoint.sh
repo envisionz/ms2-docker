@@ -19,6 +19,7 @@ conf_dir=/config
 int_conf_dir=/internal-config
 static_dir=/static
 img_asset_dir=/ms2-img-assets
+print_dir=/ms2-print-dir
 
 ms2_dir="$MS2_DIR"
 ms2_path="/mapstore"
@@ -123,6 +124,10 @@ fi
 
 if [ -d "$img_asset_dir" ]; then
     cp -f ${img_asset_dir}/* "${ms2_dir}/dist/web/client/product/assets/img/"
+fi
+
+if [ -d "$print_dir" ]; then
+    cp -f ${print_dir}/* "${ms2_dir}/printing/"
 fi
 
 MS2_HOME_SUBTITLE_EN=$(get_file_env "${MS2_HOME_SUBTITLE_EN_FILE}" "${MS2_HOME_SUBTITLE_EN}")
