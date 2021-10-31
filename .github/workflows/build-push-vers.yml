@@ -1,0 +1,63 @@
+name: Build and publish Mapstore2 image to GHCR
+
+on:
+  # Run this worflow on demand
+  workflow_dispatch:
+  # Or at 01:05:00 Tuesday (UTC)
+  schedule:
+    - cron: '5 1 * * 3'
+  push:
+    branches:
+      - v20*
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: "${{ github.repository_owner }}/mapstore"
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        ms2_version: [ "v2021.02.00" ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: "${{ matrix.ms2_version }}"
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,${{ matrix.ms2_version }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          build-args: MS2_TAG=${{ matrix.ms2_version }}
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
