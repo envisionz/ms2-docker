@@ -24,6 +24,7 @@ print_dir=/ms2-print-dir
 ms2_dir="$MS2_DIR"
 ms2_path="/mapstore"
 webinf_classes="${ms2_dir}/WEB-INF/classes"
+ms2_config_dir="${ms2_dir}/configs"
 
 gs_pg_prop="${int_conf_dir}/geostore-datasource-ovr-postgres.properties"
 gs_h2_prop="${int_conf_dir}/h2_disk.properties"
@@ -116,11 +117,11 @@ fi
 
 [ -d "$static_dir" ] && mkdir -p "${ms2_dir}/static" && cp "${static_dir}"/* "${ms2_dir}/static"
 
-[ -f "$local_config" ] && cp "$local_config" "${ms2_dir}/localConfig.json"
+[ -f "$local_config" ] && cp "$local_config" "${ms2_config_dir}/localConfig.json"
 
-[ -f "$new_json" ] && cp "$new_json" "${ms2_dir}/new.json"
+[ -f "$new_json" ] && cp "$new_json" "${ms2_config_dir}/new.json"
 
-[ -f "$plugins_config" ] && cp "$plugins_config" "${ms2_dir}/pluginsConfig.json"
+[ -f "$plugins_config" ] && cp "$plugins_config" "${ms2_config_dir}/pluginsConfig.json"
 
 if [ -d "$img_asset_dir" ]; then
     cp -f ${img_asset_dir}/* "${ms2_dir}/dist/web/client/product/assets/img/"
