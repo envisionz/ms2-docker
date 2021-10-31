@@ -1,7 +1,7 @@
 FROM tomcat:9-jre11-openjdk-buster
 
-ARG MS2_TAG=v2021.01.04
-ARG GEOSTORE_VERS=v1.6.0
+ARG MS2_TAG=v2021.02.00
+ARG GEOSTORE_VERS=v1.7.0
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     postgresql-client jq xmlstarlet gettext curl unzip git \
