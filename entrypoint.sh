@@ -29,6 +29,8 @@ ms2_config_dir="${ms2_dir}/configs"
 gs_pg_prop="${int_conf_dir}/geostore-datasource-ovr-postgres.properties"
 gs_h2_prop="${int_conf_dir}/h2_disk.properties"
 gs_user_init="${int_conf_dir}/user_init_list.xml"
+gs_ldap_prop="${int_conf_dir}/ldap.properties"
+gs_ldap_xml="${int_conf_dir}/geostore-spring-security-ldap.xml"
 log_prop="${int_conf_dir}/log4j.properties"
 
 local_config="${conf_dir}/localConfig.json"
@@ -45,16 +47,6 @@ if [ ! -z "$url_path" ]; then
 fi
 
 set_app_ctx_with_hc "$ms2_dir" "$url_path"
-
-# if [ -z "$url_path" ]; then
-#     ms2_dir=$(set_app_path "$ms2_path")
-#     webinf_classes="${ms2_dir}/WEB-INF/classes"
-#     tc_print "Mapstore2 will be available at '/' path"
-# else
-#     ms2_dir=$(set_app_path "$ms2_path" "$url_path")
-#     webinf_classes="${ms2_dir}/WEB-INF/classes"
-#     tc_print "Mapstore2 will be available at '/${url_path}' path"
-# fi
 
 # Setup connector for reverse proxy
 if [ ! -z "$proxy_domain" ]; then
@@ -74,45 +66,35 @@ sed -i -e "s/INFO/${log_level}/g" "${webinf_classes}/log4j.properties"
 
 if [ ! -z "$MS2_LDAP_HOST" ] && [ ! -z "$MS2_LDAP_BASE_DN" ] && [ ! -z "$MS2_LDAP_USER_BASE" ] && [ ! -z "$MS2_LDAP_GROUP_BASE" ] ; then
     echo "Configuring LDAP"
-    # "${ms2_dir}/WEB-INF/classes/geostore-spring-security.xml"
-    xml_del() 
-    {
-        xmlstarlet ed -P -L -d "$1" "${int_conf_dir}/ldap-geostore-spring-security.xml"
-    }
-    xml_edit_attr()
-    {
-        xmlstarlet ed -P -L -u "$1" -v "$2" "${int_conf_dir}/ldap-geostore-spring-security.xml"
-    }
+    ldap_prop="${webinf_classes}/ldap.properties"
+    cp "$gs_ldap_prop" "$ldap_prop"
 
-    [ -z "$MS2_LDAP_PROTOCOL" ] && export MS2_LDAP_PROTOCOL="ldap"
-    [ -z "$MS2_LDAP_PORT" ] && export MS2_LDAP_PORT="389"
-    [ -z "$MS2_LDAP_USER_FILTER" ] && export MS2_LDAP_USER_FILTER="(uid={0})"
-    [ -z "$MS2_LDAP_GROUP_FILTER" ] && export MS2_LDAP_GROUP_FILTER="(member={0})"
-    [ -z "$MS2_LDAP_ROLE_BASE" ] && export MS2_LDAP_ROLE_BASE="$MS2_"
-    [ -z "$MS2_LDAP_ROLE_FILTER" ] && export MS2_LDAP_ROLE_FILTER="$MS2_LDAP_GROUP_FILTER"
-    [ -z "$MS2_LDAP_ROLE_PREFIX" ] && export MS2_LDAP_ROLE_PREFIX="ROLE_"
+    cp "$gs_ldap_xml" "${webinf_classes}/geostore-spring-security.xml"
 
-    # # Attributes
-    [ -z "$MS2_LDAP_ATTR_FULL_NAME" ] && export MS2_LDAP_ATTR_FULL_NAME="cn"
-    [ -z "$MS2_LDAP_ATTR_EMAIL" ] && export MS2_LDAP_ATTR_EMAIL="mail"
+    ldap_bind_pass="$(get_file_env ${MS2_LDAP_BIND_PASS_FILE} ${MS2_LDAP_BIND_PASS})"
 
-    [ ! -z "$MS2_LDAP_NESTED_GROUP_FILTER" ] && xml_edit_attr "//property[@name=enableHierarchicalGroups]/@value" "true"
+    ldap_nested_grp_filter=${MS2_LDAP_NESTED_GROUP_FILTER:-"(member={0})"}
+    if [ ! -z "$ldap_nested_grp_filter" ] && en_hierachical_groups="true"
 
-    export MS2_LDAP_BIND_PASS="$(get_file_env ${MS2_LDAP_BIND_PASS_FILE} ${MS2_LDAP_BIND_PASS})"
-
-    if [ -z "$MS2_LDAP_BIND_DN" ] || [ -z "$MS2_LDAP_BIND_PASS" ] ; then
-        xml_del "//bean[@id=contextSource]/property[@name=userDn]"
-        xml_del "//bean[@id=contextSource]/property[@name=password]"
-    fi
-
-    # Escape xml characters in LDAP search filters
-    export MS2_LDAP_USER_FILTER=$(printenv MS2_LDAP_USER_FILTER | xmlstarlet esc)
-    export MS2_LDAP_GROUP_FILTER=$(printenv MS2_LDAP_GROUP_FILTER | xmlstarlet esc)
-    export MS2_LDAP_NESTED_GROUP_FILTER=$(printenv MS2_LDAP_NESTED_GROUP_FILTER | xmlstarlet esc)
-    export MS2_LDAP_ROLE_FILTER=$(printenv MS2_LDAP_ROLE_FILTER | xmlstarlet esc)
-
-    # envsubst '${MS2_LDAP_HOST} ${MS2_} ${MS2_} ${MS2_} ${MS2_LDAP_PORT} ${MS2_LDAP_USER_FILTER} ${MS2_LDAP_GROUP_FILTER} ${MS2_LDAP_ROLE_BASE} ${MS2_LDAP_ROLE_FILTER} ${MS2_LDAP_NESTED_GROUP_FILTER} ${MS2_LDAP_BIND_DN} ${LDAP_BIND_PW}' \
-    envsubst < "${int_conf_dir}/ldap-geostore-spring-security.xml" > "${ms2_dir}/WEB-INF/classes/geostore-spring-security.xml"
+    sed -i \
+        -e "s/ldap.proto=/ldap.proto=${MS2_LDAP_PROTOCOL:-ldap}/g" \
+        -e "s/ldap.host=/ldap.host=${MS2_LDAP_HOST}/g" \
+        -e "s/ldap.port=/ldap.port=${MS2_LDAP_PORT:-389}g" \
+        -e "s/ldap.root=/ldap.root=${MS2_LDAP_BASE_DN}/g" \
+        -e "s/ldap.userDn=/ldap.userDn=${MS2_LDAP_BIND_USER}/g" \
+        -e "s/ldap.password=/ldap.password=${ldap_bind_pass}/g" \
+        -e "s/ldap.userBase=/ldap.userBase=${MS2_LDAP_USER_BASE}/g" \
+        -e "s/ldap.groupBase=/ldap.groupBase=${MS2_LDAP_GROUP_BASE}/g" \
+        -e "s/ldap.roleBase=/ldap.roleBase=${MS2_LDAP_ROLE_BASE:-$MS2_LDAP_GROUP_BASE}/g" \
+        -e "s/ldap.userFilter=/ldap.userFilter=${MS2_LDAP_USER_FILTER:-'(uid={0})'}/g" \
+        -e "s/ldap.groupFilter=/ldap.groupFilter=${MS2_LDAP_GROUP_FILTER:-'(member={0})'}/g" \
+        -e "s/ldap.roleFilter=/ldap.roleFilter=${MS2_LDAP_ROLE_FILTER:-$MS2_LDAP_GROUP_FILTER}/g" \
+        -e "s/ldap.nestedGroupFilter=/ldap.nestedGroupFilter=${MS2_LDAP_NESTED_GROUP_FILTER:-'(member={0})'}/g" \
+        -e "s/ldap.attrMail=/ldap.attrMail=${MS2_LDAP_ATTR_EMAIL:-'mail'}/g" \
+        -e "s/ldap.attrFN=/ldap.attrFN=${MS2_LDAP_ATTR_FULL_NAME:-'cn'}/g" \
+        -e "s/ldap.attrDescription=/ldap.attrDescription=${MS2_LDAP_ATTR_DESCRIPTION:-'description'}/g" \
+        -e "s/ldap.hierachicalGroups=/ldap.hierachicalGroups=${en_hierachical_groups:-'false'}/g" \
+        "$ldap_prop"
 fi
 
 [ -d "$static_dir" ] && mkdir -p "${ms2_dir}/static" && cp "${static_dir}"/* "${ms2_dir}/static"
