@@ -74,26 +74,26 @@ if [ ! -z "$MS2_LDAP_HOST" ] && [ ! -z "$MS2_LDAP_BASE_DN" ] && [ ! -z "$MS2_LDA
     ldap_bind_pass="$(get_file_env ${MS2_LDAP_BIND_PASS_FILE} ${MS2_LDAP_BIND_PASS})"
 
     ldap_nested_grp_filter=${MS2_LDAP_NESTED_GROUP_FILTER:-"(member={0})"}
-    if [ ! -z "$ldap_nested_grp_filter" ] && en_hierachical_groups="true"
+    [ ! -z "$ldap_nested_grp_filter" ] && en_hierachical_groups="true"
 
     sed -i \
         -e "s/ldap.proto=/ldap.proto=${MS2_LDAP_PROTOCOL:-ldap}/g" \
         -e "s/ldap.host=/ldap.host=${MS2_LDAP_HOST}/g" \
-        -e "s/ldap.port=/ldap.port=${MS2_LDAP_PORT:-389}g" \
+        -e "s/ldap.port=/ldap.port=${MS2_LDAP_PORT:-389}/g" \
         -e "s/ldap.root=/ldap.root=${MS2_LDAP_BASE_DN}/g" \
         -e "s/ldap.userDn=/ldap.userDn=${MS2_LDAP_BIND_USER}/g" \
         -e "s/ldap.password=/ldap.password=${ldap_bind_pass}/g" \
         -e "s/ldap.userBase=/ldap.userBase=${MS2_LDAP_USER_BASE}/g" \
         -e "s/ldap.groupBase=/ldap.groupBase=${MS2_LDAP_GROUP_BASE}/g" \
         -e "s/ldap.roleBase=/ldap.roleBase=${MS2_LDAP_ROLE_BASE:-$MS2_LDAP_GROUP_BASE}/g" \
-        -e "s/ldap.userFilter=/ldap.userFilter=${MS2_LDAP_USER_FILTER:-'(uid={0})'}/g" \
-        -e "s/ldap.groupFilter=/ldap.groupFilter=${MS2_LDAP_GROUP_FILTER:-'(member={0})'}/g" \
+        -e "s/ldap.userFilter=/ldap.userFilter=${MS2_LDAP_USER_FILTER:-"(uid={0})"}/g" \
+        -e "s/ldap.groupFilter=/ldap.groupFilter=${MS2_LDAP_GROUP_FILTER:-"(member={0})"}/g" \
         -e "s/ldap.roleFilter=/ldap.roleFilter=${MS2_LDAP_ROLE_FILTER:-$MS2_LDAP_GROUP_FILTER}/g" \
-        -e "s/ldap.nestedGroupFilter=/ldap.nestedGroupFilter=${MS2_LDAP_NESTED_GROUP_FILTER:-'(member={0})'}/g" \
-        -e "s/ldap.attrMail=/ldap.attrMail=${MS2_LDAP_ATTR_EMAIL:-'mail'}/g" \
-        -e "s/ldap.attrFN=/ldap.attrFN=${MS2_LDAP_ATTR_FULL_NAME:-'cn'}/g" \
-        -e "s/ldap.attrDescription=/ldap.attrDescription=${MS2_LDAP_ATTR_DESCRIPTION:-'description'}/g" \
-        -e "s/ldap.hierachicalGroups=/ldap.hierachicalGroups=${en_hierachical_groups:-'false'}/g" \
+        -e "s/ldap.nestedGroupFilter=/ldap.nestedGroupFilter=${MS2_LDAP_NESTED_GROUP_FILTER:-"(member={0})"}/g" \
+        -e "s/ldap.attrMail=/ldap.attrMail=${MS2_LDAP_ATTR_EMAIL:-mail}/g" \
+        -e "s/ldap.attrFN=/ldap.attrFN=${MS2_LDAP_ATTR_FULL_NAME:-cn}/g" \
+        -e "s/ldap.attrDescription=/ldap.attrDescription=${MS2_LDAP_ATTR_DESCRIPTION:-description}/g" \
+        -e "s/ldap.hierachicalGroups=/ldap.hierachicalGroups=${en_hierachical_groups:-false}/g" \
         "$ldap_prop"
 fi
 
