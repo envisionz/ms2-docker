@@ -44,8 +44,8 @@
 	</bean>
 
 	<security:authentication-manager>
-		<security:authentication-provider ref='ldapUserDAO' />
         <security:authentication-provider ref='geoStoreUserServiceAuthenticationProvider' />
+        <security:authentication-provider ref='ldapUserDAO' />
     </security:authentication-manager>
 
     <!-- LDAP Provider configuration -->
@@ -54,11 +54,53 @@
         <property name="userDn" value="${ldap.userDn}"/>
         <property name="password" value="${ldap.password}"/>
 	</bean>
-
+	
+	<!--
     <bean id="ldapInitializer" class="it.geosolutions.geostore.init.LDAPInit" lazy-init="false">
-       <constructor-arg ref="ldapUserDAO" />
+       <constructor-arg ref="geostoreLdapProvider" />
     </bean>
 
+	<bean id="geostoreLdapProvider"
+		class="it.geosolutions.geostore.services.rest.security.UserLdapAuthenticationProvider">
+		<constructor-arg>
+			<bean
+				class="org.springframework.security.ldap.authentication.BindAuthenticator">
+				<constructor-arg ref="contextSource" />
+				<property name="userSearch">
+					<bean id="userSearch"
+						class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
+						<constructor-arg index="0" value="${ldap.userBase}" />
+						<constructor-arg index="1" value="${ldap.userFilter}" />
+						<constructor-arg index="2" ref="contextSource" />
+					</bean>
+				</property>
+			</bean>
+		</constructor-arg>
+		<constructor-arg>
+			<bean
+				class="it.geosolutions.geostore.services.rest.security.GeoStoreLdapAuthoritiesPopulator">
+				<constructor-arg ref="contextSource" />
+
+				<constructor-arg value="${ldap.groupBase}" />
+
+				<constructor-arg value="${ldap.roleBase}" />
+				<property name="groupSearchFilter" value="${ldap.groupFilter}" />
+				<property name="roleSearchFilter" value="${ldap.roleFilter}" />
+
+
+				<property name="enableHierarchicalGroups" value="${ldap.hierachicalGroups}" />
+				<property name="groupInGroupSearchFilter" value="${ldap.nestedGroupFilter}" />
+				<property name="maxLevelGroupsSearch" value="${ldap.nestedGroupLevels}" />
+
+				<property name="rolePrefix" value="ROLE_" />
+				<property name="searchSubtree" value="${ldap.searchSubtree}" />
+				<property name="convertToUpperCase" value="${ldap.convertToUpperCase}" />
+			</bean>
+		</constructor-arg>
+	</bean>
+	-->
+
+    <!-- enable direct connection mode -->
     <bean id="ldapUserDAO" class="it.geosolutions.geostore.core.dao.ldap.impl.UserDAOImpl">
         <constructor-arg ref="contextSource"/>
         <property name="searchBase" value="${ldap.userBase}"/>
@@ -81,4 +123,5 @@
     <alias name="ldapUserGroupDAO" alias="userGroupDAO"/>
     <alias name="externalSecurityDAO" alias="SecurityDAO"/>
     <alias name="ldapUserDAO" alias="userDAO"/>
+	
 </beans>

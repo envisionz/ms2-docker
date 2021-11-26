@@ -31,6 +31,7 @@ gs_h2_prop="${int_conf_dir}/h2_disk.properties"
 gs_user_init="${int_conf_dir}/user_init_list.xml"
 gs_ldap_prop="${int_conf_dir}/ldap.properties"
 gs_ldap_xml="${int_conf_dir}/geostore-spring-security-ldap.xml"
+ms2_appctx="${int_conf_dir}/applicationContext.xml"
 log_prop="${int_conf_dir}/log4j.properties"
 
 local_config="${conf_dir}/localConfig.json"
@@ -66,15 +67,41 @@ sed -i -e "s/INFO/${log_level}/g" "${webinf_classes}/log4j.properties"
 
 if [ ! -z "$MS2_LDAP_HOST" ] && [ ! -z "$MS2_LDAP_BASE_DN" ] && [ ! -z "$MS2_LDAP_USER_BASE" ] && [ ! -z "$MS2_LDAP_GROUP_BASE" ] ; then
     echo "Configuring LDAP"
+
+    gs_spring_sec="${webinf_classes}/geostore-spring-security.xml"
+
     ldap_prop="${webinf_classes}/ldap.properties"
     cp "$gs_ldap_prop" "$ldap_prop"
 
-    cp "$gs_ldap_xml" "${webinf_classes}/geostore-spring-security.xml"
+    cp "$gs_ldap_xml" "$gs_spring_sec"
 
-    ldap_bind_pass="$(get_file_env ${MS2_LDAP_BIND_PASS_FILE} ${MS2_LDAP_BIND_PASS})"
+    cp "$ms2_appctx" "${webinf_classes}/applicationContext.xml"
+
+    ldap_bind_pass="${MS2_LDAP_BIND_PASS}"
 
     ldap_nested_grp_filter=${MS2_LDAP_NESTED_GROUP_FILTER:-"(member={0})"}
     [ ! -z "$ldap_nested_grp_filter" ] && en_hierachical_groups="true"
+
+    # sed -i \
+    #     -e "s/\${ldap.proto}/${MS2_LDAP_PROTOCOL:-ldap}/g" \
+    #     -e "s/\${ldap.host}/${MS2_LDAP_HOST}/g" \
+    #     -e "s/\${ldap.port}/${MS2_LDAP_PORT:-389}/g" \
+    #     -e "s/\${ldap.root}/${MS2_LDAP_BASE_DN}/g" \
+    #     -e "s/\${ldap.userDn}/${MS2_LDAP_BIND_USER}/g" \
+    #     -e "s/\${ldap.password}/${ldap_bind_pass}/g" \
+    #     -e "s/\${ldap.userBase}/${MS2_LDAP_USER_BASE}/g" \
+    #     -e "s/\${ldap.groupBase}/${MS2_LDAP_GROUP_BASE}/g" \
+    #     -e "s/\${ldap.roleBase}/${MS2_LDAP_ROLE_BASE:-$MS2_LDAP_GROUP_BASE}/g" \
+    #     -e "s/\${ldap.userFilter}/$(printf %s ${MS2_LDAP_USER_FILTER:-"(uid={0})"} | xmlstarlet esc)/g" \
+    #     -e "s/\${ldap.groupFilter}/$(printf %s ${MS2_LDAP_GROUP_FILTER:-"(member={0})"} | xmlstarlet esc)/g" \
+    #     -e "s/\${ldap.roleFilter}/$(printf %s ${MS2_LDAP_ROLE_FILTER:-$MS2_LDAP_GROUP_FILTER} | xmlstarlet esc)/g" \
+    #     -e "s/\${ldap.nestedGroupFilter}/$(printf %s ${MS2_LDAP_NESTED_GROUP_FILTER:-"(member={0})"} | xmlstarlet esc)/g" \
+    #     -e "s/\${ldap.attrMail}/${MS2_LDAP_ATTR_EMAIL:-mail}/g" \
+    #     -e "s/\${ldap.attrFN}/${MS2_LDAP_ATTR_FULL_NAME:-cn}/g" \
+    #     -e "s/\${ldap.attrDescription}/${MS2_LDAP_ATTR_DESCRIPTION:-description}/g" \
+    #     -e "s/\${ldap.hierachicalGroups}/${en_hierachical_groups:-false}/g" \
+    #     -e "s/\${ldap.memberPattern}//g" \
+    #     "$gs_spring_sec"
 
     sed -i \
         -e "s/ldap.proto=/ldap.proto=${MS2_LDAP_PROTOCOL:-ldap}/g" \
