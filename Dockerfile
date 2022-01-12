@@ -1,6 +1,6 @@
 FROM tomcat:9-jre11-openjdk-buster
 
-ARG MS2_TAG=v2021.02.00
+ARG MS2_TAG=v2021.02.01
 ENV GEOSTORE_VERS=v1.7.0
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
