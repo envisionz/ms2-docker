@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        ms2_version: [ "v2021.02.00" ]
+        ms2_version: [ "v2021.02.01", "v2021.02.00" ]
 
     steps:
       - name: Checkout repository
