@@ -32,6 +32,13 @@ RUN mkdir -p ${MS2_DIR} && cd /srv && \
 RUN git clone https://github.com/geosolutions-it/geostore.git -b ${GEOSTORE_VERS} && \
     mkdir -p /internal-config/sql && cp -R geostore/doc/sql/. /internal-config/sql && rm -rf geostore
 
+# Replace extremely outdated Postgres jbdc driver with a modern version
+# Note Mapstore2 2022.01.00 should have a newer driver, and this can be dropped
+RUN [ -f ${MS2_DIR}/WEB-INF/lib/postgresql-8.4-702.jdbc3.jar ] \
+    && rm ${MS2_DIR}/WEB-INF/lib/postgresql-8.4-702.jdbc3.jar \
+    && curl -L -o ${MS2_DIR}/WEB-INF/lib/postgresql-42.3.1.jar https://jdbc.postgresql.org/download/postgresql-42.3.1.jar \
+    && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DIR}/WEB-INF/lib/postgresql-42.3.1.jar
+
 # Copy files required for customization
 COPY ./config/ /internal-config/
 # Set variable to better handle terminal commands
