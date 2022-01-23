@@ -165,11 +165,8 @@ set_admin_user()
 {
     echo "creating admin user..."
     MS2_ADMIN_PASS=$(get_file_env "${MS2_ADMIN_PASS_FILE}" "${MS2_ADMIN_PASS}")
-
-    [ -z MS2_ADMIN_USER ] && MS2_ADMIN_USER="admin"
-    [ -z MS2_ADMIN_PASS ] && MS2_ADMIN_PASS="admin"
-    xmlstarlet ed -P -L -u "/InitUserList/User/name" -v "$MS2_ADMIN_USER" ${gs_user_init}
-    xmlstarlet ed -P -L -u "/InitUserList/User/newPassword" -v "$MS2_ADMIN_PASS" ${gs_user_init}
+    xmlstarlet ed -P -L -u "/InitUserList/User/name" -v "${MS2_ADMIN_USER:-admin}" ${gs_user_init}
+    xmlstarlet ed -P -L -u "/InitUserList/User/newPassword" -v "${MS2_ADMIN_PASS:-admin}" ${gs_user_init}
     echo "geostoreInitializer.userListInitFile=file://${gs_user_init}" >> "$1"
 }
 
