@@ -161,6 +161,8 @@ pg_user=$(get_file_env "${MS2_PG_USER_FILE}" "${MS2_PG_USER}")
 
 pg_pass=$(get_file_env "${MS2_PG_PASS_FILE}" "${MS2_PG_PASS}")
 
+pg_idle=${MS2_PG_IDLE_MITIGATION:-false}
+
 set_admin_user()
 {
     echo "creating admin user..."
@@ -184,6 +186,12 @@ if [ ! -z "$MS2_PG_HOST" ] && [ ! -z "$pg_user" ] && [ ! -z "$pg_pass" ] ; then
         -e 's|\(geostoreDataSource.password=\)|\1'"${pg_pass}"'|g' \
         -e 's|\(geostoreEntityManagerFactory\.jpaPropertyMap\[hibernate\.default_schema\]=\)|\1'"${pg_schema}"'|g' \
         "$pg_prop"
+    
+    # If requested, add postgres idle connection mitigations
+    if [ "$pg_idle" != "false" ]; then
+        sed -i -e 's|#geostoreDataSource|geostoreDataSource|g' \
+        "$pg_prop"
+    fi
     
     until pg_isready; do
         echo "Postgres is unavailable - sleeping"
