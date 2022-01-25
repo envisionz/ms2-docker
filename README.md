@@ -18,6 +18,7 @@ You may customise the container using the following environment variables.
 | `MS2_PG_PASS`, `MS2_PG_PASS_FILE` | PostgreSQL password. |
 | `MS2_HOME_SUBTITLE_EN`, `MS2_HOME_SUBTITLE_EN_FILE` | Customise subtitle on Home screen |
 | `MS2_HOME_FOOTER_EN`, `MS2_HOME_FOOTER_EN_FILE` | Customise footer on Home screen |
+| `MS2_HTML_TITLE` | Customise the HTML title for tab/window |
 | `MS2_URL_PATH` | Access Mapstore2 from the specified path. Default is `/mapstore` |
 | `MS2_PROXY_DOMAIN` | Set when behind reverse proxy. Example: `my.domain.org` |
 | `MS2_PROXY_PROTO` | Is the proxy a TLS terminating proxy? Valid values are `http` or `https` |
