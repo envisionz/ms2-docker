@@ -140,51 +140,49 @@ if [ -d "$print_dir" ]; then
     cp -f ${print_dir}/* "${ms2_dir}/printing/"
 fi
 
-MS2_HOME_SUBTITLE_EN=$(get_file_env "${MS2_HOME_SUBTITLE_EN_FILE}" "${MS2_HOME_SUBTITLE_EN}")
+subtitle_en=$(get_file_env "${MS2_HOME_SUBTITLE_EN_FILE}" "${MS2_HOME_SUBTITLE_EN}")
 # todo: make the following more generic for more language support
-if [ ! -z "$MS2_HOME_SUBTITLE_EN" ] ; then
-    cat "${ms2_dir}/translations/data.en-US.json" | jq --arg st "$MS2_HOME_SUBTITLE_EN" '.messages.home.shortDescription = $st' > ~/data.en-US.json && \
+if [ ! -z "$subtitle_en" ] ; then
+    cat "${ms2_dir}/translations/data.en-US.json" | jq --arg st "$subtitle_en" '.messages.home.shortDescription = $st' > ~/data.en-US.json && \
     mv ~/data.en-US.json "${ms2_dir}/translations/data.en-US.json"
 fi
 
-MS2_HOME_FOOTER_EN=$(get_file_env "${MS2_HOME_FOOTER_EN_FILE}" "${MS2_HOME_FOOTER_EN}")
-if [ ! -z "$MS2_HOME_FOOTER_EN" ] ; then
-    cat "${ms2_dir}/translations/data.en-US.json" | jq --arg ft "$MS2_HOME_FOOTER_EN" '.messages.home.footerDescription = $ft' > ~/data.en-US.json && \
+home_footer_en=$(get_file_env "${MS2_HOME_FOOTER_EN_FILE}" "${MS2_HOME_FOOTER_EN}")
+if [ ! -z "$home_footer_en" ] ; then
+    cat "${ms2_dir}/translations/data.en-US.json" | jq --arg ft "$home_footer_en" '.messages.home.footerDescription = $ft' > ~/data.en-US.json && \
     mv ~/data.en-US.json "${ms2_dir}/translations/data.en-US.json"
 fi
 
-[ -z "$MS2_PG_PORT" ] && MS2_PG_PORT=5432
+pg_port=${MS2_PG_PORT:-5432}
+pg_db=${MS2_PG_DB:-geostore}
+pg_schema=${MS2_PG_SCHEMA:-geostore}
 
-[ -z "$MS2_PG_DB" ] && MS2_PG_DB=geostore
+pg_user=$(get_file_env "${MS2_PG_USER_FILE}" "${MS2_PG_USER}")
 
-MS2_PG_USER=$(get_file_env "${MS2_PG_USER_FILE}" "${MS2_PG_USER}")
-
-MS2_PG_PASS=$(get_file_env "${MS2_PG_PASS_FILE}" "${MS2_PG_PASS}")
+pg_pass=$(get_file_env "${MS2_PG_PASS_FILE}" "${MS2_PG_PASS}")
 
 set_admin_user()
 {
     echo "creating admin user..."
-    MS2_ADMIN_PASS=$(get_file_env "${MS2_ADMIN_PASS_FILE}" "${MS2_ADMIN_PASS}")
+    admin_pass=$(get_file_env "${MS2_ADMIN_PASS_FILE}" "${MS2_ADMIN_PASS}")
     xmlstarlet ed -P -L -u "/InitUserList/User/name" -v "${MS2_ADMIN_USER:-admin}" ${gs_user_init}
-    xmlstarlet ed -P -L -u "/InitUserList/User/newPassword" -v "${MS2_ADMIN_PASS:-admin}" ${gs_user_init}
+    xmlstarlet ed -P -L -u "/InitUserList/User/newPassword" -v "${admin_pass:-admin}" ${gs_user_init}
     echo "geostoreInitializer.userListInitFile=file://${gs_user_init}" >> "$1"
 }
 
-if [ ! -z "$MS2_PG_HOST" ] && [ ! -z "$MS2_PG_USER" ] && [ ! -z "$MS2_PG_PASS" ] ; then
+if [ ! -z "$MS2_PG_HOST" ] && [ ! -z "$pg_user" ] && [ ! -z "$pg_pass" ] ; then
     export PGHOST="$MS2_PG_HOST"
-    export PGPORT="$MS2_PG_PORT"
-    export PGDATABASE="$MS2_PG_DB"
-    export PGUSER="$MS2_PG_USER"
-    export PGPASSWORD="$MS2_PG_PASS"
-
-    [ -z "$MS2_PG_SCHEMA" ] && MS2_PG_SCHEMA=geostore
+    export PGPORT="$pg_port"
+    export PGDATABASE="$pg_db"
+    export PGUSER="$pg_user"
+    export PGPASSWORD="$pg_pass"
 
     pg_prop="${webinf_classes}/geostore-datasource-ovr.properties"
     cp "$gs_pg_prop" "$pg_prop"
-    sed -i -e 's|\(geostoreDataSource.url=\)|\1jdbc:postgresql://'"${MS2_PG_HOST}:${MS2_PG_PORT}"'/'"${MS2_PG_DB}"'|g' \
-        -e 's|\(geostoreDataSource.username=\)|\1'"${MS2_PG_USER}"'|g' \
-        -e 's|\(geostoreDataSource.password=\)|\1'"${MS2_PG_PASS}"'|g' \
-        -e 's|\(geostoreEntityManagerFactory\.jpaPropertyMap\[hibernate\.default_schema\]=\)|\1'"${MS2_PG_SCHEMA}"'|g' \
+    sed -i -e 's|\(geostoreDataSource.url=\)|\1jdbc:postgresql://'"${MS2_PG_HOST}:${pg_port}"'/'"${pg_db}"'|g' \
+        -e 's|\(geostoreDataSource.username=\)|\1'"${pg_user}"'|g' \
+        -e 's|\(geostoreDataSource.password=\)|\1'"${pg_pass}"'|g' \
+        -e 's|\(geostoreEntityManagerFactory\.jpaPropertyMap\[hibernate\.default_schema\]=\)|\1'"${pg_schema}"'|g' \
         "$pg_prop"
     
     until pg_isready; do
@@ -193,13 +191,13 @@ if [ ! -z "$MS2_PG_HOST" ] && [ ! -z "$MS2_PG_USER" ] && [ ! -z "$MS2_PG_PASS" ]
     done
 
     # We can connect to the db. Let's check if the 'geostore' schema exists
-    schema_res=`psql -t -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '${MS2_PG_SCHEMA}';"`
-    if ! printf "%s" "$schema_res" | grep -q "$MS2_PG_SCHEMA" ; then
+    schema_res=`psql -t -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '${pg_schema}';"`
+    if ! printf "%s" "$schema_res" | grep -q "$pg_schema" ; then
         echo "geostore schema does not exist. creating..."
-        psql -c "CREATE SCHEMA ${MS2_PG_SCHEMA};"
-        psql -c "GRANT USAGE ON SCHEMA ${MS2_PG_SCHEMA} TO ${MS2_PG_USER};"
-        psql -c "GRANT ALL ON SCHEMA ${MS2_PG_SCHEMA} TO ${MS2_PG_USER};"
-        psql -c "ALTER USER ${MS2_PG_USER} SET search_path TO ${MS2_PG_SCHEMA} , public;"
+        psql -c "CREATE SCHEMA ${pg_schema};"
+        psql -c "GRANT USAGE ON SCHEMA ${pg_schema} TO ${pg_user};"
+        psql -c "GRANT ALL ON SCHEMA ${pg_schema} TO ${pg_user};"
+        psql -c "ALTER USER ${pg_user} SET search_path TO ${pg_schema} , public;"
 
         set_admin_user "$pg_prop"
         sed -i \
