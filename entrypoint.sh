@@ -179,7 +179,7 @@ if [ ! -z "$MS2_PG_HOST" ] && [ ! -z "$pg_user" ] && [ ! -z "$pg_pass" ] ; then
     export PGUSER="$pg_user"
     export PGPASSWORD="$pg_pass"
 
-    pg_prop="${webinf_classes}/geostore-datasource-ovr.properties"
+    pg_prop="${MS2_DATA_DIR}/geostore-datasource-ovr.properties"
     cp "$gs_pg_prop" "$pg_prop"
     sed -i -e 's|\(geostoreDataSource.url=\)|\1jdbc:postgresql://'"${MS2_PG_HOST}:${pg_port}"'/'"${pg_db}"'|g' \
         -e 's|\(geostoreDataSource.username=\)|\1'"${pg_user}"'|g' \
@@ -232,7 +232,7 @@ fi
 java_mem_start=${MS2_JAVA_MEM_START:-"128m"} 
 java_mem_max=${MS2_JAVA_MEM_MAX:-"256m"} 
 
-mapstore_java_opts="-Xms${java_mem_start} -Xmx${java_mem_max}"
+mapstore_java_opts="-Xms${java_mem_start} -Xmx${java_mem_max} -Ddatadir.location=${MS2_DATA_DIR}"
 export JAVA_OPTS="${JAVA_OPTS} ${mapstore_java_opts}"
 
 # Run original tomcat CMD

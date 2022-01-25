@@ -40,7 +40,10 @@ RUN [ -f ${MS2_DIR}/WEB-INF/lib/postgresql-8.4-702.jdbc3.jar ] \
     && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DIR}/WEB-INF/lib/postgresql-42.3.1.jar
 
 ENV MS2_SCRIPT_DIR=/scripts
-RUN mkdir -p ${MS2_SCRIPT_DIR}
+ENV MS2_DATA_DIR=/srv/mapstore_data
+
+RUN mkdir -p ${MS2_SCRIPT_DIR} ${MS2_DATA_DIR} \
+    && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DATA_DIR}
 
 # Get common tomcat function for paths and proxy
 RUN curl -o ${MS2_SCRIPT_DIR}/tc_common.sh https://raw.githubusercontent.com/envisionz/docker-common/3442a7b5860647524d52a662d704d8cc5d814d99/tomcat/tomcat-common.sh \
