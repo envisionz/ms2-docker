@@ -39,14 +39,6 @@ RUN [ -f ${MS2_DIR}/WEB-INF/lib/postgresql-8.4-702.jdbc3.jar ] \
     && curl -L -o ${MS2_DIR}/WEB-INF/lib/postgresql-42.3.1.jar https://jdbc.postgresql.org/download/postgresql-42.3.1.jar \
     && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DIR}/WEB-INF/lib/postgresql-42.3.1.jar
 
-# Copy files required for customization
-COPY ./config/ /internal-config/
-# Set variable to better handle terminal commands
-ENV TERM xterm
-
-RUN mkdir -p /h2db \
-    && chown "${MS2_USER}:${MS2_GROUP}" /h2db /internal-config/user_init_list.xml
-
 ENV MS2_SCRIPT_DIR=/scripts
 RUN mkdir -p ${MS2_SCRIPT_DIR}
 
@@ -60,6 +52,14 @@ RUN curl -o ${MS2_SCRIPT_DIR}/tc_healthcheck.sh https://raw.githubusercontent.co
     && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_SCRIPT_DIR}/tc_healthcheck.sh \
     && chmod +x ${MS2_SCRIPT_DIR}/tc_healthcheck.sh
 ENV HEALTH_URL_FILE=/home/${MS2_USER}/health_url.txt
+
+# Copy files required for customization
+COPY ./config/ /internal-config/
+# Set variable to better handle terminal commands
+ENV TERM xterm
+
+RUN mkdir -p /h2db \
+    && chown "${MS2_USER}:${MS2_GROUP}" /h2db /internal-config/user_init_list.xml
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
