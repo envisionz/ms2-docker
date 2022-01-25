@@ -47,9 +47,6 @@ ENV TERM xterm
 RUN mkdir -p /h2db \
     && chown "${MS2_USER}:${MS2_GROUP}" /h2db /internal-config/user_init_list.xml
 
-COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 ENV MS2_SCRIPT_DIR=/scripts
 RUN mkdir -p ${MS2_SCRIPT_DIR}
 
@@ -63,6 +60,9 @@ RUN curl -o ${MS2_SCRIPT_DIR}/tc_healthcheck.sh https://raw.githubusercontent.co
     && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_SCRIPT_DIR}/tc_healthcheck.sh \
     && chmod +x ${MS2_SCRIPT_DIR}/tc_healthcheck.sh
 ENV HEALTH_URL_FILE=/home/${MS2_USER}/health_url.txt
+
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 USER ${MS2_USER}
 
