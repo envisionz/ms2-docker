@@ -16,6 +16,7 @@ You may customise the container using the following environment variables.
 | `MS2_PG_SCHEMA` | PostgreSQL schema to use. Default `geostore` |
 | `MS2_PG_USER`, `MS2_PG_USER_FILE` | PostgreSQL username. |
 | `MS2_PG_PASS`, `MS2_PG_PASS_FILE` | PostgreSQL password. |
+| `MS2_PG_IDLE_MITIGATION` | Add mitigations for idle postgres connection timeouts |
 | `MS2_HOME_SUBTITLE_EN`, `MS2_HOME_SUBTITLE_EN_FILE` | Customise subtitle on Home screen |
 | `MS2_HOME_FOOTER_EN`, `MS2_HOME_FOOTER_EN_FILE` | Customise footer on Home screen |
 | `MS2_HTML_TITLE` | Customise the HTML title for tab/window |
