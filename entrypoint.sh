@@ -153,11 +153,10 @@ if [ ! -z "$home_footer_en" ] ; then
     mv ~/data.en-US.json "${ms2_dir}/translations/data.en-US.json"
 fi
 
-html_title="$MS2_HTML_TITLE"
-if [ -n "$html_title" ]; then
-    find "$ms2_dir" "${ms2_dir}/dist" -name "*.html" -exec \
-        sed -i -r -e 's|(<title>)MapStore HomePage(</title>)|\1'"$html_title"'\2|g' {} \;
-fi
+html_title="${MS2_HTML_TITLE:-"Mapstore HomePage"}"
+find "$ms2_dir" "${ms2_dir}/dist" -name "*.html" -exec \
+    sed -i -r -e 's|(<title>)MapStore HomePage(</title>)|\1'"$html_title"'\2|g' \
+              -e 's|https://cdn\.jslibs\.mapstore2\.geo-solutions\.it/leaflet/favicon\.ico|dist/web/client/product/assets/img/favicon.ico|g' {} \;
 
 pg_port=${MS2_PG_PORT:-5432}
 pg_db=${MS2_PG_DB:-geostore}

@@ -39,6 +39,9 @@ RUN [ -f ${MS2_DIR}/WEB-INF/lib/postgresql-8.4-702.jdbc3.jar ] \
     && curl -L -o ${MS2_DIR}/WEB-INF/lib/postgresql-42.3.1.jar https://jdbc.postgresql.org/download/postgresql-42.3.1.jar \
     && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DIR}/WEB-INF/lib/postgresql-42.3.1.jar
 
+# Copy the favicon from product/assets/img/ to dist/web/client/product/assets/img/
+RUN cp ${MS2_DIR}/product/assets/img/favicon.ico ${MS2_DIR}/dist/web/client/product/assets/img/favicon.ico
+
 ENV MS2_SCRIPT_DIR=/scripts
 ENV MS2_DATA_DIR=/srv/mapstore_data
 
