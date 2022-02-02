@@ -1,3 +1,17 @@
+FROM node:12-buster AS ms2-builder
+
+RUN npm install -g npm@6.14.13
+
+RUN git clone --recursive --branch 2021.02.01-print https://github.com/envisionz/MapStore2.git
+
+RUN cd MapStore2 \
+    && npm install
+
+RUN cd MapStore2 \
+    && npm run compile
+
+RUN pwd
+
 FROM tomcat:9-jre8-openjdk-buster
 
 ARG MS2_TAG=v2021.02.01
@@ -27,6 +41,8 @@ RUN mkdir -p ${MS2_DIR} && cd /srv && \
     unzip ../mapstore-printing.zip && cd .. && \
     rm mapstore.war mapstore-printing.zip && \
     chown -R "${MS2_USER}:${MS2_GROUP}" ./mapstore
+
+COPY --from=ms2-builder --chown=${MS2_USER}:${MS2_GROUP} /MapStore2/web/client/dist/ /srv/mapstore/dist/
 
 # Dowonload Geostore and extract sql scripts
 RUN git clone https://github.com/geosolutions-it/geostore.git -b ${GEOSTORE_VERS} && \
