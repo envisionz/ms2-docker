@@ -1,10 +1,10 @@
 FROM tomcat:9-jre8-openjdk-buster
 
-ARG MS2_TAG=v2021.02.01
+ARG MS2_TAG=v2021.02.02
 ENV GEOSTORE_VERS=v1.7.0
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
-    postgresql-client jq xmlstarlet gettext curl unzip zip git \
+    postgresql-client jq xmlstarlet gettext curl unzip zip git ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -24,6 +24,7 @@ RUN mkdir -p ${MS2_DIR} && cd /srv && \
     curl -L -o mapstore.war https://github.com/geosolutions-it/MapStore2/releases/download/${MS2_TAG}/mapstore.war && \
     curl -L -o mapstore-printing.zip https://github.com/geosolutions-it/MapStore2/releases/download/${MS2_TAG}/mapstore-printing.zip && \
     cd ./mapstore && unzip ../mapstore.war && \
+    if [ -d ./mapstore/WEB-INF ]; then cd .. && mv ./mapstore/mapstore ./mapstore_tmp && rm -rf ./mapstore && mv ./mapstore_tmp ./mapstore && cd ./mapstore; fi && \
     unzip ../mapstore-printing.zip && cd .. && \
     rm mapstore.war mapstore-printing.zip && \
     chown -R "${MS2_USER}:${MS2_GROUP}" ./mapstore
