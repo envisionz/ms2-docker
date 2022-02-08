@@ -2,7 +2,7 @@ FROM node:12-buster AS ms2-builder
 
 RUN npm install -g npm@6.14.13
 
-RUN git clone --recursive --branch 2021.02.01-print https://github.com/envisionz/MapStore2.git
+RUN git clone --recursive --branch 2021.02.02-print https://github.com/envisionz/MapStore2.git
 
 RUN cd MapStore2 \
     && npm install
