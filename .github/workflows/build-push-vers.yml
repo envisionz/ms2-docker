@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         ms2_version: 
-          - "v2021.02.02-print"
+          - "v2021.02.02-envisionz"
           - "v2021.02.02-jre8"
           - "v2021.02.01-print"
           - "v2021.02.01-jre8"
