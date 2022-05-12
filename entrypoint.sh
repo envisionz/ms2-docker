@@ -30,7 +30,6 @@ gs_pg_prop="${int_conf_dir}/geostore-datasource-ovr-postgres.properties"
 gs_h2_prop="${int_conf_dir}/h2_disk.properties"
 gs_user_init="${int_conf_dir}/user_init_list.xml"
 
-ms2_appctx="${int_conf_dir}/applicationContext.xml"
 log_prop="${int_conf_dir}/log4j.properties"
 
 local_config="${conf_dir}/localConfig.json"
