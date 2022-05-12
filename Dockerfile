@@ -50,8 +50,8 @@ ENV MS2_DIR=/srv/mapstore
 ENV MS2_SCRIPT_DIR=/scripts
 ENV MS2_DATA_DIR=/srv/mapstore_data
 
-RUN mkdir -p ${MS2_SCRIPT_DIR} ${MS2_DATA_DIR} \
-    && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DATA_DIR}
+RUN mkdir -p ${MS2_SCRIPT_DIR} ${MS2_DATA_DIR}/configs ${MS2_DATA_DIR}/extensions \
+    && chown -R "${MS2_USER}:${MS2_GROUP}" ${MS2_DATA_DIR}
 
 # Get common tomcat function for paths and proxy
 RUN curl -o ${MS2_SCRIPT_DIR}/tc_common.sh https://raw.githubusercontent.com/envisionz/docker-common/3442a7b5860647524d52a662d704d8cc5d814d99/tomcat/tomcat-common.sh \
