@@ -64,10 +64,6 @@ RUN curl -o ${MS2_SCRIPT_DIR}/tc_healthcheck.sh https://raw.githubusercontent.co
     && chmod +x ${MS2_SCRIPT_DIR}/tc_healthcheck.sh
 ENV HEALTH_URL_FILE=/home/${MS2_USER}/health_url.txt
 
-# Dowonload Geostore and extract sql scripts
-RUN git clone https://github.com/geosolutions-it/geostore.git -b ${GEOSTORE_VERS} && \
-    mkdir -p /internal-config/sql && cp -R geostore/doc/sql/. /internal-config/sql && rm -rf geostore
-
 # Download and extract Mapstore2 WAR files
 COPY --from=ms2-builder --chown=${MS2_USER}:${MS2_GROUP} /mapstore/ /srv/mapstore/
 
