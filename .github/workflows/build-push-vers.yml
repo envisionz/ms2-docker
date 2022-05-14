@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - v20*
+      - 2-20*
 
 env:
   REGISTRY: ghcr.io
@@ -24,6 +25,7 @@ jobs:
     strategy:
       matrix:
         ms2_version: 
+          - "2-2022.01.01"
           - "v2021.02.02-envisionz"
           - "v2021.02.02-jre8"
           - "v2021.02.01-print"
