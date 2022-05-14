@@ -1,0 +1,19 @@
+{
+    "plugins": {
+        "remove" : [
+            {"modes": "all", "value": "Footer"},
+            {"modes": ["maps"], "value": "Fork"}
+        ],
+        "replace" : [{
+            "modes": "all",
+            "value": {
+                    "name": "Attribution",
+                    "cfg": {
+                      "src": "https://example.org/logo.png",
+                      "href": "https:/example.org/",
+                      "label": "Example Org"
+                    }
+            }
+        }]
+    }
+}

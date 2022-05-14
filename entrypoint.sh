@@ -15,7 +15,11 @@ get_file_env()
     fi
 }
 
-conf_dir=/config
+index_jsonpatch_plugins()
+{
+    local file_path="$1"
+}
+
 int_conf_dir=/internal-config
 static_dir=/static
 img_asset_dir=/ms2-img-assets
@@ -24,19 +28,16 @@ print_dir=/ms2-print-dir
 ms2_dir="$MS2_DIR"
 ms2_path="/mapstore"
 webinf_classes="${ms2_dir}/WEB-INF/classes"
-ms2_config_dir="${ms2_dir}/configs"
+ms2_config_dir="${MS2_DATA_DIR}/configs"
 
 gs_pg_prop="${int_conf_dir}/geostore-datasource-ovr-postgres.properties"
 gs_h2_prop="${int_conf_dir}/h2_disk.properties"
 gs_user_init="${int_conf_dir}/user_init_list.xml"
-gs_ldap_prop="${int_conf_dir}/ldap.properties"
-gs_ldap_xml="${int_conf_dir}/geostore-spring-security-ldap.xml"
-ms2_appctx="${int_conf_dir}/applicationContext.xml"
-log_prop="${int_conf_dir}/log4j.properties"
 
-local_config="${conf_dir}/localConfig.json"
-new_json="${conf_dir}/new.json"
-plugins_config="${conf_dir}/pluginsConfig.json"
+orig_local_config="${int_conf_dir}/localConfig.json"
+plugin_patch_file="${MS2_PLUGIN_PATCH_DIR}/patch.json"
+
+log_prop="${int_conf_dir}/log4j.properties"
 
 url_path="${MS2_URL_PATH:-$ms2_path}"
 proxy_domain="$MS2_PROXY_DOMAIN"
@@ -64,73 +65,10 @@ fi
 log_level=${MS2_LOG_LEVEL:-WARN}
 cp -f "${log_prop}" "${webinf_classes}/log4j.properties"
 sed -i -e "s/INFO/${log_level}/g" "${webinf_classes}/log4j.properties"
+printf "%s\n" "org.apache.cxf.common.logging.Slf4jLogger" > "${webinf_classes}/META-INF/cxf/org.apache.cxf.Logger"
 
-if [ ! -z "$MS2_LDAP_HOST" ] && [ ! -z "$MS2_LDAP_BASE_DN" ] && [ ! -z "$MS2_LDAP_USER_BASE" ] && [ ! -z "$MS2_LDAP_GROUP_BASE" ] ; then
-    echo "Configuring LDAP"
-
-    gs_spring_sec="${webinf_classes}/geostore-spring-security.xml"
-
-    ldap_prop="${webinf_classes}/ldap.properties"
-    cp "$gs_ldap_prop" "$ldap_prop"
-
-    cp "$gs_ldap_xml" "$gs_spring_sec"
-
-    cp "$ms2_appctx" "${webinf_classes}/applicationContext.xml"
-
-    ldap_bind_pass="${MS2_LDAP_BIND_PASS}"
-
-    ldap_nested_grp_filter=${MS2_LDAP_NESTED_GROUP_FILTER:-"(member={0})"}
-    [ ! -z "$ldap_nested_grp_filter" ] && en_hierachical_groups="true"
-
-    # sed -i \
-    #     -e "s/\${ldap.proto}/${MS2_LDAP_PROTOCOL:-ldap}/g" \
-    #     -e "s/\${ldap.host}/${MS2_LDAP_HOST}/g" \
-    #     -e "s/\${ldap.port}/${MS2_LDAP_PORT:-389}/g" \
-    #     -e "s/\${ldap.root}/${MS2_LDAP_BASE_DN}/g" \
-    #     -e "s/\${ldap.userDn}/${MS2_LDAP_BIND_USER}/g" \
-    #     -e "s/\${ldap.password}/${ldap_bind_pass}/g" \
-    #     -e "s/\${ldap.userBase}/${MS2_LDAP_USER_BASE}/g" \
-    #     -e "s/\${ldap.groupBase}/${MS2_LDAP_GROUP_BASE}/g" \
-    #     -e "s/\${ldap.roleBase}/${MS2_LDAP_ROLE_BASE:-$MS2_LDAP_GROUP_BASE}/g" \
-    #     -e "s/\${ldap.userFilter}/$(printf %s ${MS2_LDAP_USER_FILTER:-"(uid={0})"} | xmlstarlet esc)/g" \
-    #     -e "s/\${ldap.groupFilter}/$(printf %s ${MS2_LDAP_GROUP_FILTER:-"(member={0})"} | xmlstarlet esc)/g" \
-    #     -e "s/\${ldap.roleFilter}/$(printf %s ${MS2_LDAP_ROLE_FILTER:-$MS2_LDAP_GROUP_FILTER} | xmlstarlet esc)/g" \
-    #     -e "s/\${ldap.nestedGroupFilter}/$(printf %s ${MS2_LDAP_NESTED_GROUP_FILTER:-"(member={0})"} | xmlstarlet esc)/g" \
-    #     -e "s/\${ldap.attrMail}/${MS2_LDAP_ATTR_EMAIL:-mail}/g" \
-    #     -e "s/\${ldap.attrFN}/${MS2_LDAP_ATTR_FULL_NAME:-cn}/g" \
-    #     -e "s/\${ldap.attrDescription}/${MS2_LDAP_ATTR_DESCRIPTION:-description}/g" \
-    #     -e "s/\${ldap.hierachicalGroups}/${en_hierachical_groups:-false}/g" \
-    #     -e "s/\${ldap.memberPattern}//g" \
-    #     "$gs_spring_sec"
-
-    sed -i \
-        -e "s/ldap.proto=/ldap.proto=${MS2_LDAP_PROTOCOL:-ldap}/g" \
-        -e "s/ldap.host=/ldap.host=${MS2_LDAP_HOST}/g" \
-        -e "s/ldap.port=/ldap.port=${MS2_LDAP_PORT:-389}/g" \
-        -e "s/ldap.root=/ldap.root=${MS2_LDAP_BASE_DN}/g" \
-        -e "s/ldap.userDn=/ldap.userDn=${MS2_LDAP_BIND_USER}/g" \
-        -e "s/ldap.password=/ldap.password=${ldap_bind_pass}/g" \
-        -e "s/ldap.userBase=/ldap.userBase=${MS2_LDAP_USER_BASE}/g" \
-        -e "s/ldap.groupBase=/ldap.groupBase=${MS2_LDAP_GROUP_BASE}/g" \
-        -e "s/ldap.roleBase=/ldap.roleBase=${MS2_LDAP_ROLE_BASE:-$MS2_LDAP_GROUP_BASE}/g" \
-        -e "s/ldap.userFilter=/ldap.userFilter=${MS2_LDAP_USER_FILTER:-"(uid={0})"}/g" \
-        -e "s/ldap.groupFilter=/ldap.groupFilter=${MS2_LDAP_GROUP_FILTER:-"(member={0})"}/g" \
-        -e "s/ldap.roleFilter=/ldap.roleFilter=${MS2_LDAP_ROLE_FILTER:-$MS2_LDAP_GROUP_FILTER}/g" \
-        -e "s/ldap.nestedGroupFilter=/ldap.nestedGroupFilter=${MS2_LDAP_NESTED_GROUP_FILTER:-"(member={0})"}/g" \
-        -e "s/ldap.attrMail=/ldap.attrMail=${MS2_LDAP_ATTR_EMAIL:-mail}/g" \
-        -e "s/ldap.attrFN=/ldap.attrFN=${MS2_LDAP_ATTR_FULL_NAME:-cn}/g" \
-        -e "s/ldap.attrDescription=/ldap.attrDescription=${MS2_LDAP_ATTR_DESCRIPTION:-description}/g" \
-        -e "s/ldap.hierachicalGroups=/ldap.hierachicalGroups=${en_hierachical_groups:-false}/g" \
-        "$ldap_prop"
-fi
-
-[ -d "$static_dir" ] && mkdir -p "${ms2_dir}/static" && cp "${static_dir}"/* "${ms2_dir}/static"
-
-[ -f "$local_config" ] && cp "$local_config" "${ms2_config_dir}/localConfig.json"
-
-[ -f "$new_json" ] && cp "$new_json" "${ms2_config_dir}/new.json"
-
-[ -f "$plugins_config" ] && cp "$plugins_config" "${ms2_config_dir}/pluginsConfig.json"
+# Symlink static directory if mounted in the container
+[ -d "$static_dir" ] && ln -s "${static_dir}/" "${ms2_dir}/static"
 
 if [ -d "$img_asset_dir" ]; then
     cp -f ${img_asset_dir}/* "${ms2_dir}/dist/web/client/product/assets/img/"
@@ -157,6 +95,14 @@ html_title="${MS2_HTML_TITLE:-"Mapstore HomePage"}"
 find "$ms2_dir" "${ms2_dir}/dist" -name "*.html" -exec \
     sed -i -r -e 's|(<title>)MapStore HomePage(</title>)|\1'"$html_title"'\2|g' \
               -e 's|https://cdn\.jslibs\.mapstore2\.geo-solutions\.it/leaflet/favicon\.ico|dist/web/client/product/assets/img/favicon.ico|g' {} \;
+
+if [ -f "$plugin_patch_file" ]; then
+    tc_print "Patching localConfig plugins"
+    python3 "${MS2_SCRIPT_DIR}/pluginPatch.py" \
+        "$orig_local_config" \
+        "${ms2_dir}/configs/localConfig.json" \
+        "$plugin_patch_file"
+fi
 
 pg_port=${MS2_PG_PORT:-5432}
 pg_db=${MS2_PG_DB:-geostore}
@@ -228,17 +174,17 @@ else
     echo "Postgres database and/or credentials not supplied"
     echo "Using H2 store at /h2db/db"
 
-    h2_prop="${webinf_classes}/geostore-datasource-ovr.properties"
+    h2_prop="${MS2_DATA_DIR}/geostore-datasource-ovr.properties"
     cp "$gs_h2_prop" "$h2_prop"
     sed -i -e 's,dbc:h2:\./test,dbc:h2:/h2db/db,g' "$h2_prop"
     set_admin_user "$h2_prop"
 fi
 
-java_mem_start=${MS2_JAVA_MEM_START:-"128m"} 
-java_mem_max=${MS2_JAVA_MEM_MAX:-"256m"} 
+java_mem_start=${MS2_JAVA_MEM_START:-"256m"} 
+java_mem_max=${MS2_JAVA_MEM_MAX:-"512m"} 
 
-mapstore_java_opts="-Xms${java_mem_start} -Xmx${java_mem_max} -Ddatadir.location=${MS2_DATA_DIR}"
-export JAVA_OPTS="${JAVA_OPTS} ${mapstore_java_opts}"
+mapstore_java_opts="-Xms${java_mem_start} -Xmx${java_mem_max} -Ddatadir.location=${MS2_DATA_DIR}" 
+export JAVA_OPTS="${JAVA_OPTS} -Dorg.jboss.logging.provider=log4j ${mapstore_java_opts}"
 
 # Run original tomcat CMD
 exec catalina.sh run
