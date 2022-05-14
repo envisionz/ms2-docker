@@ -1,0 +1,4 @@
+.vscode
+pluginPatch/localConfig.json
+pluginPatch/pluginPatch.dist
+pluginPatch/pluginPatch.build

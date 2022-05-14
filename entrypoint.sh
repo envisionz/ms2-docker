@@ -15,6 +15,11 @@ get_file_env()
     fi
 }
 
+index_jsonpatch_plugins()
+{
+    local file_path="$1"
+}
+
 conf_dir=/config
 int_conf_dir=/internal-config
 static_dir=/static
@@ -62,7 +67,7 @@ sed -i -e "s/INFO/${log_level}/g" "${webinf_classes}/log4j.properties"
 # Symlink static directory if mounted in the container
 [ -d "$static_dir" ] && ln -s "${static_dir}/" "${ms2_dir}/static"
 
-[ -d "$img_asset_dir" ]; then
+if [ -d "$img_asset_dir" ]; then
     cp -f ${img_asset_dir}/* "${ms2_dir}/dist/web/client/product/assets/img/"
 fi
 
@@ -165,7 +170,7 @@ else
 fi
 
 java_mem_start=${MS2_JAVA_MEM_START:-"256m"} 
-java_mem_max=${MS2_JAVA_MEM_MAX:-"512"} 
+java_mem_max=${MS2_JAVA_MEM_MAX:-"512m"} 
 
 mapstore_java_opts="-Xms${java_mem_start} -Xmx${java_mem_max} -Ddatadir.location=${MS2_DATA_DIR}"
 export JAVA_OPTS="${JAVA_OPTS} ${mapstore_java_opts}"
