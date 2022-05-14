@@ -24,20 +24,17 @@ jobs:
 
     strategy:
       matrix:
-        ms2_version: 
-          - "2-2022.01.01"
-          - "v2021.02.02-envisionz"
-          - "v2021.02.02-jre8"
-          - "v2021.02.01-print"
-          - "v2021.02.01-jre8"
-          - "v2021.02.01"
-          - "v2021.02.00"
+        conf:
+          - branch: "2-2022.01.01"
+            latest: true
+          - branch: "v2021.02.02-envisionz"
+            latest: false   
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          ref: "${{ matrix.ms2_version }}"
+          ref: "${{ matrix.conf.branch }}"
 
       - name: Log in to the Container registry
         uses: docker/login-action@v1
@@ -58,7 +55,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,${{ matrix.ms2_version }}
+            type=raw,${{ matrix.conf.branch }}
+            ${{ matrix.conf.latest && 'type=raw,latest' || '' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
