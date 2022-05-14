@@ -33,6 +33,23 @@ If `MS2_PG_HOST`, `MS2_PG_USER` and `MS2_PG_PASS` are not set, the container fal
 
 ## Overriding Config Files
 
+Images tagged with `2-20*` has changed how adding config files has worked.
+
+The container now uses the Mapstore external data directory feature for providing
+custom config files. This feature also allows using json patch files in the format 
+of `configName.json.patch`.
+
+Configuration files should be mounted at `/srv/mapstore_data/configs`.
+
+Due to deficiencies of JSON Patch with regards to modifying array entries, a new script
+has been developed specifically to patch `plugin` configurations in `localConfig.json`. 
+You can use this in addition to the existing JSON Patch functionality, it is applied first. 
+
+To use the plugin patch script, mount the patch file at `/plugin-patch/patch.json`. There 
+is a sample in the `pluginPatch` directory.
+
+### First generation containers
+
 If you mount the following files in the container, they will override the default Mapstore2 files:
 
 | Mountpoint | Description |
