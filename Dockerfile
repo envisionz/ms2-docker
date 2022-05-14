@@ -20,11 +20,14 @@ RUN npm run compile
 
 RUN mkdir /mapstore
 WORKDIR /mapstore
-RUN curl -L -o ../mapstore.war https://github.com/geosolutions-it/MapStore2/releases/download/v${MS2_VERS}/mapstore.war \
+RUN mkdir -p mapstore-bin && cd mapstore-bin \
+    && curl -L -o ./mapstore-bin.zip https://github.com/geosolutions-it/MapStore2/releases/download/v${MS2_VERS}/mapstore2-${MS2_VERS}-bin.zip \
+    && unzip mapstore-bin.zip && cd .. \
     && curl -L -o ../mapstore-printing.zip https://github.com/geosolutions-it/MapStore2/releases/download/v${MS2_VERS}/mapstore-printing.zip \
-    && unzip ../mapstore.war \
+    && unzip ./mapstore-bin/mapstore2/webapps/mapstore.war \
     && unzip ../mapstore-printing.zip \
-    && rm ../mapstore.war ../mapstore-printing.zip \
+    && rm ../mapstore-printing.zip \
+    && rm -rf ./mapstore-bin \
     && cp -a /MapStore2/web/client/dist/. ./dist
 
 FROM tomcat:9-jre11-openjdk-bullseye
@@ -75,11 +78,8 @@ RUN cp ${MS2_DIR}/product/assets/img/favicon.ico ${MS2_DIR}/dist/web/client/prod
 # Copy files required for customization
 COPY ./config/ /internal-config/
 
-# For some reason, the WAR archive for v2022.01.01 has a broken localConfig.json file
-RUN curl -s -L https://raw.githubusercontent.com/geosolutions-it/MapStore2/v${MS2_VERS}/web/client/configs/localConfig.json \
-    | jq 'del(.authenticationRules[2])' > ${MS2_DIR}/configs/localConfig.json \
-    && cp ${MS2_DIR}/configs/localConfig.json /internal-config/localConfig.json \
-    && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DIR}/configs/localConfig.json /internal-config/localConfig.json
+RUN cp ${MS2_DIR}/configs/localConfig.json /internal-config/localConfig.json \
+    && chown "${MS2_USER}:${MS2_GROUP}" /internal-config/localConfig.json
 
 # Set variable to better handle terminal commands
 ENV TERM xterm
