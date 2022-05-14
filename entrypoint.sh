@@ -20,7 +20,6 @@ index_jsonpatch_plugins()
     local file_path="$1"
 }
 
-conf_dir=/config
 int_conf_dir=/internal-config
 static_dir=/static
 img_asset_dir=/ms2-img-assets
@@ -34,6 +33,9 @@ ms2_config_dir="${MS2_DATA_DIR}/configs"
 gs_pg_prop="${int_conf_dir}/geostore-datasource-ovr-postgres.properties"
 gs_h2_prop="${int_conf_dir}/h2_disk.properties"
 gs_user_init="${int_conf_dir}/user_init_list.xml"
+
+orig_local_config="${int_conf_dir}/localConfig.json"
+plugin_patch_file="${MS2_PLUGIN_PATCH_DIR}/patch.json"
 
 log_prop="${int_conf_dir}/log4j.properties"
 
@@ -92,6 +94,14 @@ html_title="${MS2_HTML_TITLE:-"Mapstore HomePage"}"
 find "$ms2_dir" "${ms2_dir}/dist" -name "*.html" -exec \
     sed -i -r -e 's|(<title>)MapStore HomePage(</title>)|\1'"$html_title"'\2|g' \
               -e 's|https://cdn\.jslibs\.mapstore2\.geo-solutions\.it/leaflet/favicon\.ico|dist/web/client/product/assets/img/favicon.ico|g' {} \;
+
+if [ -f "$plugin_patch_file" ]; then
+    tc_print "Patching localConfig plugins"
+    python3 "${MS2_SCRIPT_DIR}/pluginPatch.py" \
+        "$orig_local_config" \
+        "${ms2_dir}/configs/localConfig.json" \
+        "$plugin_patch_file"
+fi
 
 pg_port=${MS2_PG_PORT:-5432}
 pg_db=${MS2_PG_DB:-geostore}

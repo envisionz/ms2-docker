@@ -50,9 +50,10 @@ RUN chown -R "${MS2_USER}:${MS2_GROUP}" ${CATALINA_HOME}
 ENV MS2_DIR=/srv/mapstore
 ENV MS2_SCRIPT_DIR=/scripts
 ENV MS2_DATA_DIR=/srv/mapstore_data
+ENV MS2_PLUGIN_PATCH_DIR=/plugin-patch
 
-RUN mkdir -p ${MS2_SCRIPT_DIR} ${MS2_DATA_DIR}/configs ${MS2_DATA_DIR}/extensions \
-    && chown -R "${MS2_USER}:${MS2_GROUP}" ${MS2_DATA_DIR}
+RUN mkdir -p ${MS2_SCRIPT_DIR} ${MS2_DATA_DIR}/configs ${MS2_DATA_DIR}/extensions ${MS2_PLUGIN_PATCH_DIR} \
+    && chown -R "${MS2_USER}:${MS2_GROUP}" ${MS2_DATA_DIR} ${MS2_PLUGIN_PATCH_DIR}
 
 # Get common tomcat function for paths and proxy
 RUN curl -o ${MS2_SCRIPT_DIR}/tc_common.sh https://raw.githubusercontent.com/envisionz/docker-common/3442a7b5860647524d52a662d704d8cc5d814d99/tomcat/tomcat-common.sh \
@@ -71,13 +72,15 @@ COPY --from=ms2-builder --chown=${MS2_USER}:${MS2_GROUP} /mapstore/ /srv/mapstor
 # Copy the favicon from product/assets/img/ to dist/web/client/product/assets/img/
 RUN cp ${MS2_DIR}/product/assets/img/favicon.ico ${MS2_DIR}/dist/web/client/product/assets/img/favicon.ico
 
+# Copy files required for customization
+COPY ./config/ /internal-config/
+
 # For some reason, the WAR archive for v2022.01.01 has a broken localConfig.json file
 RUN curl -s -L https://raw.githubusercontent.com/geosolutions-it/MapStore2/v${MS2_VERS}/web/client/configs/localConfig.json \
     | jq 'del(.authenticationRules[2])' > ${MS2_DIR}/configs/localConfig.json \
-    && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DIR}/configs/localConfig.json
+    && cp ${MS2_DIR}/configs/localConfig.json /internal-config/localConfig.json \
+    && chown "${MS2_USER}:${MS2_GROUP}" ${MS2_DIR}/configs/localConfig.json /internal-config/localConfig.json
 
-# Copy files required for customization
-COPY ./config/ /internal-config/
 # Set variable to better handle terminal commands
 ENV TERM xterm
 
