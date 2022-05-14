@@ -65,6 +65,7 @@ fi
 log_level=${MS2_LOG_LEVEL:-WARN}
 cp -f "${log_prop}" "${webinf_classes}/log4j.properties"
 sed -i -e "s/INFO/${log_level}/g" "${webinf_classes}/log4j.properties"
+printf "%s\n" "org.apache.cxf.common.logging.Slf4jLogger" > "${webinf_classes}/META-INF/cxf/org.apache.cxf.Logger"
 
 # Symlink static directory if mounted in the container
 [ -d "$static_dir" ] && ln -s "${static_dir}/" "${ms2_dir}/static"
@@ -182,8 +183,8 @@ fi
 java_mem_start=${MS2_JAVA_MEM_START:-"256m"} 
 java_mem_max=${MS2_JAVA_MEM_MAX:-"512m"} 
 
-mapstore_java_opts="-Xms${java_mem_start} -Xmx${java_mem_max} -Ddatadir.location=${MS2_DATA_DIR}"
-export JAVA_OPTS="${JAVA_OPTS} ${mapstore_java_opts}"
+mapstore_java_opts="-Xms${java_mem_start} -Xmx${java_mem_max} -Ddatadir.location=${MS2_DATA_DIR}" 
+export JAVA_OPTS="${JAVA_OPTS} -Dorg.jboss.logging.provider=log4j ${mapstore_java_opts}"
 
 # Run original tomcat CMD
 exec catalina.sh run
