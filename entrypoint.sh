@@ -67,8 +67,9 @@ cp -f "${log_prop}" "${webinf_classes}/log4j.properties"
 sed -i -e "s/INFO/${log_level}/g" "${webinf_classes}/log4j.properties"
 printf "%s\n" "org.apache.cxf.common.logging.Slf4jLogger" > "${webinf_classes}/META-INF/cxf/org.apache.cxf.Logger"
 
-# Symlink static directory if mounted in the container
-[ -d "$static_dir" ] && ln -s "${static_dir}/" "${ms2_dir}/static"
+if [ -d "$static_dir" ]; then 
+    mkdir -p "${ms2_dir}/static" && cp "${static_dir}"/* "${ms2_dir}/static"
+fi;
 
 if [ -d "$img_asset_dir" ]; then
     cp -f ${img_asset_dir}/* "${ms2_dir}/dist/web/client/product/assets/img/"
