@@ -105,6 +105,11 @@ if [ -f "$plugin_patch_file" ]; then
         "$plugin_patch_file"
 fi
 
+if [ "$MS2_USE_SOURCE_MAPS" = "true" ]; then
+    cd "${ms2_dir}"
+    unzip -o /frontend-source-maps.zip
+fi
+
 pg_port=${MS2_PG_PORT:-5432}
 pg_db=${MS2_PG_DB:-geostore}
 pg_schema=${MS2_PG_SCHEMA:-geostore}

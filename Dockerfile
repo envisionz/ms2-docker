@@ -1,22 +1,13 @@
 ARG MS2_VERS=2022.01.01
 
-FROM node:12-bullseye AS ms2-builder
+FROM debian:bullseye AS ms2-builder
 
 ARG MS2_VERS
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
-    curl unzip \
+    curl unzip ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g npm@6.14.13
-
-RUN git clone --recursive --branch ${MS2_VERS}-envisionz https://github.com/envisionz/MapStore2.git
-
-WORKDIR /MapStore2
-
-RUN npm install
-RUN npm run compile
 
 RUN mkdir /mapstore
 WORKDIR /mapstore
@@ -28,7 +19,12 @@ RUN mkdir -p mapstore-bin && cd mapstore-bin \
     && unzip ../mapstore-printing.zip \
     && rm ../mapstore-printing.zip \
     && rm -rf ./mapstore-bin \
-    && cp -a /MapStore2/web/client/dist/. ./dist
+    && curl -L -o ../ms2-dist.zip https://github.com/envisionz/MapStore2/releases/download/rel-test1-envisionz/frontend-dist.zip \
+    && unzip -o ../ms2-dist.zip \
+    && rm ../ms2-dist.zip
+
+RUN curl -L -o /frontend-source-maps.zip \
+        https://github.com/envisionz/MapStore2/releases/download/rel-test1-envisionz/frontend-source-maps.zip
 
 FROM tomcat:9-jre11-openjdk-bullseye
 
@@ -71,6 +67,7 @@ ENV HEALTH_URL_FILE=/home/${MS2_USER}/health_url.txt
 
 # Download and extract Mapstore2 WAR files
 COPY --from=ms2-builder --chown=${MS2_USER}:${MS2_GROUP} /mapstore/ /srv/mapstore/
+COPY --from=ms2-builder --chown=${MS2_USER}:${MS2_GROUP} /frontend-source-maps.zip /frontend-source-maps.zip
 
 # Copy the favicon from product/assets/img/ to dist/web/client/product/assets/img/
 RUN cp ${MS2_DIR}/product/assets/img/favicon.ico ${MS2_DIR}/dist/web/client/product/assets/img/favicon.ico
