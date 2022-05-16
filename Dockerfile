@@ -65,9 +65,11 @@ RUN curl -o ${MS2_SCRIPT_DIR}/tc_healthcheck.sh https://raw.githubusercontent.co
     && chmod +x ${MS2_SCRIPT_DIR}/tc_healthcheck.sh
 ENV HEALTH_URL_FILE=/home/${MS2_USER}/health_url.txt
 
+ENV MS2_FRONTENT_SRC_MAP_ZIP=/frontend-source-maps.zip
+
 # Download and extract Mapstore2 WAR files
 COPY --from=ms2-builder --chown=${MS2_USER}:${MS2_GROUP} /mapstore/ /srv/mapstore/
-COPY --from=ms2-builder --chown=${MS2_USER}:${MS2_GROUP} /frontend-source-maps.zip /frontend-source-maps.zip
+COPY --from=ms2-builder --chown=${MS2_USER}:${MS2_GROUP} "${MS2_FRONTENT_SRC_MAP_ZIP}" "${MS2_FRONTENT_SRC_MAP_ZIP}"
 
 # Copy the favicon from product/assets/img/ to dist/web/client/product/assets/img/
 RUN cp ${MS2_DIR}/product/assets/img/favicon.ico ${MS2_DIR}/dist/web/client/product/assets/img/favicon.ico

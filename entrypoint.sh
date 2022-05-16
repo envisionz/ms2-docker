@@ -107,7 +107,7 @@ fi
 
 if [ "$MS2_USE_SOURCE_MAPS" = "true" ]; then
     cd "${ms2_dir}"
-    unzip -o /frontend-source-maps.zip
+    unzip -o "$MS2_FRONTENT_SRC_MAP_ZIP"
 fi
 
 pg_port=${MS2_PG_PORT:-5432}
