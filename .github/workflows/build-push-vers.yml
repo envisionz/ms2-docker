@@ -10,6 +10,7 @@ on:
     branches:
       - v20*
       - 2-20*
+      - main
 
 env:
   REGISTRY: ghcr.io
@@ -28,7 +29,9 @@ jobs:
           - branch: "2-2022.01.01"
             latest: true
           - branch: "v2021.02.02-envisionz"
-            latest: false   
+            latest: false
+          - branch: "main"
+            latest: false
 
     steps:
       - name: Checkout repository
