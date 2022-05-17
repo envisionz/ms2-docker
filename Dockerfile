@@ -19,12 +19,12 @@ RUN mkdir -p mapstore-bin && cd mapstore-bin \
     && unzip ../mapstore-printing.zip \
     && rm ../mapstore-printing.zip \
     && rm -rf ./mapstore-bin \
-    && curl -L -o ../ms2-dist.zip https://github.com/envisionz/MapStore2/releases/download/rel-test2-envisionz/frontend-dist.zip \
+    && curl -L -o ../ms2-dist.zip https://github.com/envisionz/MapStore2/releases/download/rel-test3-envisionz/frontend-dist.zip \
     && unzip -o ../ms2-dist.zip \
     && rm ../ms2-dist.zip
 
 RUN curl -L -o /frontend-source-maps.zip \
-        https://github.com/envisionz/MapStore2/releases/download/rel-test2-envisionz/frontend-source-maps.zip
+        https://github.com/envisionz/MapStore2/releases/download/rel-test3-envisionz/frontend-source-maps.zip
 
 FROM tomcat:9-jre11-openjdk-bullseye
 
