@@ -1,4 +1,4 @@
-ARG MS2_VERS=2022.01.01
+ARG MS2_VERS=2022.01.02
 
 FROM debian:bullseye AS ms2-builder
 
@@ -19,12 +19,12 @@ RUN mkdir -p mapstore-bin && cd mapstore-bin \
     && unzip ../mapstore-printing.zip \
     && rm ../mapstore-printing.zip \
     && rm -rf ./mapstore-bin \
-    && curl -L -o ../ms2-dist.zip https://github.com/envisionz/MapStore2/releases/download/rel-test6-envisionz/frontend-dist.zip \
+    && curl -L -o ../ms2-dist.zip https://github.com/envisionz/MapStore2/releases/download/v${MS2_VERS}-envisionz/frontend-dist.zip \
     && unzip -o ../ms2-dist.zip \
     && rm ../ms2-dist.zip
 
 RUN curl -L -o /frontend-source-maps.zip \
-        https://github.com/envisionz/MapStore2/releases/download/rel-test6-envisionz/frontend-source-maps.zip
+        https://github.com/envisionz/MapStore2/releases/download/v${MS2_VERS}-envisionz/frontend-source-maps.zip
 
 FROM tomcat:9-jre11-openjdk-bullseye
 
