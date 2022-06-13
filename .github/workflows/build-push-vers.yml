@@ -26,8 +26,10 @@ jobs:
     strategy:
       matrix:
         conf:
-          - branch: "2-2022.01.01"
+          - branch: "2-2022.01.02"
             latest: true
+          - branch: "2-2022.01.01"
+            latest: false
           - branch: "v2021.02.02-envisionz"
             latest: false
           - branch: "main"
